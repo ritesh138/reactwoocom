@@ -2,22 +2,20 @@ import React, { Component } from "react";
 import { BaseUrl } from "./../Config.js";
 
 export function postData(url, request_data, token) {
-  var headers = '';
+  var headers = { 
+    "Content-Type": "application/json",
+    //"cache-control": "no-cache",
+   };
 
-  if(token)
-  {
-    headers = { 
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token }
-  }
-  else{
-    headers = { 
-      "Content-Type": "application/json"
-    }
+  if (token) {
+    headers["Authorization"] = "Bearer " + token;
   }
 
+  var BASE_WITH_URL = BaseUrl + url;
+  // var BASE_WITH_URL = 'http://localhost/add_to_cart.php';
   return new Promise((resolve, reject) => {
-    fetch(BaseUrl + url, {
+    fetch(BASE_WITH_URL, {
+      crossDomain : true,
       method: "POST",
       body: JSON.stringify(request_data),
       headers: headers
@@ -33,17 +31,23 @@ export function postData(url, request_data, token) {
   });
 }
 
-
 export function getData(url, token) {
+  var headers = { 
+    "Content-Type": "application/json"
+  };
+
+  if (token) {
+    headers["Authorization"] = "Bearer " + token;
+  }
+
   return new Promise((resolve, reject) => {
     fetch(BaseUrl + url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token
-      },
+      async: true,
+      crossDomain: true,
+      headers: headers,
       data: {
-        thumb: true
+        thumb : true
       }
     })
       .then(response => response.json())
@@ -58,22 +62,27 @@ export function getData(url, token) {
 }
 
 export function deleteData(url, request_data, token) {
-    return new Promise((resolve, reject) => {
-      fetch(BaseUrl + url, {
-        method: "DELETE",
-        body: JSON.stringify(request_data),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token
-        }
+  var headers = { 
+    "Content-Type": "application/json"
+   };
+
+  if (token) {
+    headers["Authorization"] = "Bearer " + token;
+  }
+
+  return new Promise((resolve, reject) => {
+    fetch(BaseUrl + url, {
+      method: "DELETE",
+      body: JSON.stringify(request_data),
+      headers: headers
+    })
+      .then(response => response.json())
+      .then(responseJson => {
+        resolve(responseJson);
       })
-        .then(response => response.json())
-        .then(responseJson => {
-          resolve(responseJson);
-        })
-        .catch(error => {
-          reject(error);
-          console.error(error);
-        });
-    });
+      .catch(error => {
+        reject(error);
+        console.error(error);
+      });
+  });
 }

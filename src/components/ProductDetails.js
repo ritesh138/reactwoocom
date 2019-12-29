@@ -12,14 +12,55 @@ class SingleProduct extends Component {
       error: null,
       isLoaded: false,
 	  product_id: id,
-	  productDetails: []
+	  productDetails: [],
+	  matchArr: []
     };
   }
 
-  handleChange = (key, value) => {
+  handleChange = (key, value , label) => {
 	var tempState = {}
 	tempState[key] = value;
 	this.setState(tempState);
+	( 'select' == key ) ? this.matchVariations(value,label) : this.matchVariations('')
+  }
+
+  matchVariations = ( slug , label ) => {
+	let length = 0;
+	this.state.productDetails.variations.map((val,index) => {
+		var variation_id = val.id;
+		var price = val.price;
+		length = val.attributes.length;
+		val.attributes.map((val1,index1)=>{
+			var label1 =  val1.name
+			var slug1 = val1.option
+			if( (slug == slug1) && (label == label1 ) )
+			{
+				if( !this.state.matchArr.includes(slug) ){
+					this.state.matchArr[label] = slug
+				}
+			}
+			else if( ( label == label1 ) && ( !slug ) )
+			{
+				delete this.state.matchArr[label];
+			}
+		})
+	})
+	if( length == Object.keys(this.state.matchArr).length )
+	{
+		this.getVariationId(this.state.matchArr)
+	}
+  }
+
+  getVariationId = ( variations ) => {
+	this.state.productDetails.variations.map((val,index) => {
+		var variation_id = val.id;
+		var price = val.price;
+		val.attributes.map((val1,index1)=>{
+			var label1 =  val1.name
+			var slug1 = val1.option
+			console.log(variations)
+		})
+	}) 
   }
 
    productData () {
@@ -33,10 +74,6 @@ class SingleProduct extends Component {
 		});
 	  });
 	}
-	
-	getVariationId( slug ) {
-
-	}
 
     componentDidMount() {
 	    this.productData();
@@ -46,16 +83,6 @@ class SingleProduct extends Component {
     if (!this.state.isLoaded) {
         return false;
 	}
-
-	var html  = '';
-	this.state.productDetails.attributes.map((val,index) => {
-		html += '<label>'+val.name+'</label><select><option value="">Choose an option</option>'
-		val.options.map((val1,index1) => {
-			html += '<option value='+val1.toLowerCase()+'>'+val1+'</option>'
-		})
-		html += '</select>'
-		html += ''
-	})
 
     return (
       <div>
@@ -260,7 +287,19 @@ class SingleProduct extends Component {
 								<p><b>Condition:</b> New</p>
 	                            <p><b>categories:</b> {this.state.productDetails.categories.map((val,index) => (<span> {val.name}</span>))}</p>
 								<a href=""><img src="images/product-details/share.png" className="share img-responsive"  alt="" /></a>
-								<div dangerouslySetInnerHTML={{ __html: html }}/>
+
+								{ this.state.productDetails.attributes.map((val,index) => (
+									<>
+                                    <label>{val.name}</label>
+									<select onChange={(e) => this.handleChange('select',e.target.value,val.name)}>
+									<option value="">Select an option</option>
+									{val.options.map((val1,index1) => (
+									<option value={val1}>{val1}</option>
+									))}		
+									</select>
+									</>
+								))
+								}
 							</div>
 						</div>
 					</div>
