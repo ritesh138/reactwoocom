@@ -43,8 +43,6 @@ export function getData(url, token) {
   return new Promise((resolve, reject) => {
     fetch(BaseUrl + url, {
       method: "GET",
-      async: true,
-      crossDomain: true,
       headers: headers,
       data: {
         thumb : true

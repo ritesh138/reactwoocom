@@ -10,6 +10,7 @@ import Shop from "./components/Shop.js";
 import ContactUs from "./components/ContactUs.js";
 import ProductCategories from "./components/ProductCategories.js";
 import SingleProduct from "./components/ProductDetails.js";
+import Checkout from "./components/Checkout.js";
 
 class App extends Component {
   render() {
@@ -25,6 +26,7 @@ class App extends Component {
             <Route exact path="/contact" component={ContactUs} />
             <Route exact path="/category/:id" component={ProductCategories} />
             <Route exact path="/product/:id" component={SingleProduct} />
+            <Route exact path="/checkout/" component={Checkout} />
           </div>
         </Router>
       </div>

@@ -3,9 +3,15 @@ import { WooCommerce , WooCommerceV3 } from "./WoocommerceConnection";
 import { postData , getData , deleteData } from "./Common";
 import Notifications, {notify} from 'react-notify-toast';
 
-export const addToCart = (product_id, qty) =>{
+export const addToCart = (product_id, qty , variation_id ) =>{
     var token = localStorage.getItem('token');
-    var req = {product_id:product_id,quantity:qty}
+
+    if(variation_id){
+        var req = {product_id:product_id,quantity:qty,variation_id:variation_id}
+    }
+    else{
+        var req = {product_id:product_id,quantity:qty}
+    }
     postData('wp-json/cocart/v1/add-item', req , token).then((result) => {
 		if(result.product_id){
             notify.show('Added to cart!');

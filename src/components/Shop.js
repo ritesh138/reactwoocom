@@ -18,7 +18,6 @@ class Shop extends Component {
   }
 
   getData(page) {
-    console.log(page);
     if (page) {
       var page = page;
     } else {
@@ -59,6 +58,9 @@ class Shop extends Component {
     for (let i = 0; i < numberOfPages; i++) {
       table.push(i);
     }
+
+    let product_types = ['variable','variable-subscription'];
+
     return (
       <div>
         <Header />
@@ -160,6 +162,7 @@ class Shop extends Component {
                   <h2 className="title text-center">Features Items</h2>
                   {this.state.items.map((val, index) => (
                     <div className="col-sm-4">
+                      {console.log(val.type)}
                       <div className="product-image-wrapper">
                         <div className="single-products">
                           <div id={val.id} className="productinfo text-center">
@@ -169,12 +172,16 @@ class Shop extends Component {
                               <p>{val.name}</p>
                             </Link>
                             <a
-                              href="#"
+                             style={{display:  ( !product_types.includes(val.type) ) ? 'block' : 'none' }}
+                              href="javascript:void(0)"
                               className="btn btn-default add-to-cart"
                               onClick={() => addToCart(val.id)}
                             >
-                              <i className="fa fa-shopping-cart"></i>Add to cart
+                            <i className="fa fa-shopping-cart"></i>Add to cart
                             </a>
+                            <Link class="btn btn-default add-to-cart" style={{display:  ( product_types.includes(val.type) ) ? 'block' : 'none' }} to={"/product/" + val.id}>
+                              select option
+                            </Link>
                           </div>
                         </div>
 

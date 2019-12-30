@@ -7,13 +7,16 @@ import { addToCart } from "../service/WoocommerceFunctions";
 class SingleProduct extends Component {
   constructor({ match :{ params :{id} } }) {
 	super();
-	
     this.state = {
       error: null,
       isLoaded: false,
 	  product_id: id,
 	  productDetails: [],
-	  matchArr: []
+	  matchArr: [],
+	  tempArr: [],
+	  product: '',
+	  variation_id: '',
+	  variation_price: ''
     };
   }
 
@@ -25,41 +28,60 @@ class SingleProduct extends Component {
   }
 
   matchVariations = ( slug , label ) => {
-	let length = 0;
-	this.state.productDetails.variations.map((val,index) => {
-		var variation_id = val.id;
-		var price = val.price;
-		length = val.attributes.length;
-		val.attributes.map((val1,index1)=>{
-			var label1 =  val1.name
-			var slug1 = val1.option
-			if( (slug == slug1) && (label == label1 ) )
-			{
-				if( !this.state.matchArr.includes(slug) ){
-					this.state.matchArr[label] = slug
-				}
-			}
-			else if( ( label == label1 ) && ( !slug ) )
-			{
-				delete this.state.matchArr[label];
-			}
-		})
-	})
-	if( length == Object.keys(this.state.matchArr).length )
-	{
-		this.getVariationId(this.state.matchArr)
+	  
+	if( !this.state.matchArr.includes(slug) ){
+		this.state.matchArr[label] = slug
 	}
+	if( !slug ){
+		delete this.state.matchArr[label];
+	}
+
+	const unordered = Object.assign({}, this.state.matchArr)
+	const ordered = {};
+	Object.keys(unordered).sort().forEach(function(key) {
+	ordered[key] = unordered[key];
+	});
+	this.getVariationId(ordered);
   }
 
   getVariationId = ( variations ) => {
+	var length = this.state.productDetails.attributes.length;
 	this.state.productDetails.variations.map((val,index) => {
 		var variation_id = val.id;
 		var price = val.price;
 		val.attributes.map((val1,index1)=>{
-			var label1 =  val1.name
-			var slug1 = val1.option
-			console.log(variations)
+			var label =  val1.name
+			var slug = val1.option
+			if( !this.state.tempArr.includes(slug) ){
+				this.state.tempArr[label] = slug
+			}
+			if( !slug)
+			{
+				delete this.state.tempArr[label];
+			}
 		})
+		const unordered1 = Object.assign({}, this.state.tempArr)
+		const ordered1 = {};
+		Object.keys(unordered1).sort().forEach(function(key) {
+		ordered1[key] = unordered1[key];
+		});
+		if( length == Object.keys(variations).length )
+		{
+			if( JSON.stringify(variations) === JSON.stringify(ordered1) )
+			{
+				this.setState({
+					variation_id: variation_id,
+					variation_price: price
+				});
+			}
+		}
+		else{
+			this.setState({
+				variation_id: '',
+				variation_price: ''
+			});
+		}
+		this.state.tempArr = [];
 	}) 
   }
 
@@ -67,10 +89,11 @@ class SingleProduct extends Component {
 	var product_id = this.state.product_id;
 	const that = this;
 	WooCommerce.getAsync('products/'+product_id).then(function(result) {
-		// console.log(result.toJSON().body);
+		var product_type = JSON.parse(result.toJSON().body).type;
 		that.setState({
-		  isLoaded: true,
-		  productDetails: JSON.parse(result.toJSON().body)
+			isLoaded: true,
+			productDetails: JSON.parse(result.toJSON().body),
+			product: product_type
 		});
 	  });
 	}
@@ -83,6 +106,7 @@ class SingleProduct extends Component {
     if (!this.state.isLoaded) {
         return false;
 	}
+	let product_types = ['variable','variable-subscription'];
 
     return (
       <div>
@@ -274,10 +298,10 @@ class SingleProduct extends Component {
 								<div dangerouslySetInnerHTML={{ __html: this.state.productDetails.description}} />
 								<img src="images/product-details/rating.png" alt="" />
 								<span>
-									<span>${this.state.productDetails.price}</span>
+									<span>${ this.state.variation_price || this.state.productDetails.price }</span>
 									<label>Quantity:</label>
 									<input onChange={(e) => this.handleChange('quantity',e.target.value)} type="number" value={ this.state.quantity || 1 } />
-									<button type="button" className="btn btn-fefault cart" onClick={ () => addToCart(this.state.productDetails.id , this.state.quantity) }>
+									<button type="button" className="btn btn-fefault cart" style={{pointerEvents:  ( !product_types.includes(this.state.product)  ||  this.state.variation_id) ? 'auto' : 'none' }} onClick={ () => addToCart(this.state.product_id , this.state.quantity, this.state.variation_id) }>
 										<i className="fa fa-shopping-cart"></i>
 										Add to cart
 									</button>

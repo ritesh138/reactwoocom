@@ -4,6 +4,7 @@ import { WooCommerce } from "../service/WoocommerceConnection.js";
 import Footer from "./Footer.js";
 import { getCartContent , getCartTotals , getCurrentCurrency } from "../service/WoocommerceFunctions";
 import { removeCartItem , updateCart } from "../service/WoocommerceFunctions";
+import { Link } from "react-router-dom";
 
 class Cart extends Component {
   constructor(props) {
@@ -49,7 +50,7 @@ class Cart extends Component {
 
   componentDidMount() {
     getCartContent().then(result => {
-      //   console.log(result);
+        console.log(result);
         this.setState({ cart: result, isLoaded: true });
     });
     getCartTotals().then(result => {
@@ -217,9 +218,9 @@ class Cart extends Component {
                     <a className="btn btn-default update" href="">
                       Update
                     </a>
-                    <a className="btn btn-default check_out" href="">
+                    <Link className="btn btn-default check_out" to={"/checkout/"}>
                       Check Out
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>

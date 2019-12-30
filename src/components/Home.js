@@ -30,6 +30,7 @@ class Home extends Component {
   }
 
   render() {
+    let product_types = ['variable','variable-subscription'];
     return (
       <div>
 		<Header />
@@ -434,9 +435,17 @@ class Home extends Component {
                             <h2>${val.price}</h2>
                             <p>{val.name}</p>
                             </Link>
-                            <a href="javascript:void(0);" className="btn btn-default add-to-cart" onClick={() => addToCart(val.id)}>
-                              <i className="fa fa-shopping-cart"></i>Add to cart
+                            <a
+                             style={{display:  ( !product_types.includes(val.type) ) ? 'block' : 'none' }}
+                              href="javascript:void(0)"
+                              className="btn btn-default add-to-cart"
+                              onClick={() => addToCart(val.id)}
+                            >
+                            <i className="fa fa-shopping-cart"></i>Add to cart
                             </a>
+                            <Link className="btn btn-default add-to-cart" style={{display:  ( product_types.includes(val.type) ) ? 'block' : 'none' }} to={"/product/" + val.id}>
+                              select option
+                            </Link>
                           </div>
                         </div>
                         <div className="choose">
