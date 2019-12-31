@@ -48,6 +48,22 @@ export const getCurrentCurrency = () => {
     });
 }
 
+export const getAllCountries = () => {
+    return new Promise((resolve, reject) => {
+    WooCommerceV3.getAsync("data/countries").then(function(result) {
+        resolve(JSON.parse(result.toJSON().body));
+    })
+    });
+}
+
+export const getAllStates = (id) => {
+    return new Promise((resolve, reject) => {
+    WooCommerceV3.getAsync("data/countries/"+id).then(function(result) {
+        resolve(JSON.parse(result.toJSON().body));
+    })
+    });
+}
+
 export const removeCartItem = ( cart_item_key ) => {
     var token = localStorage.getItem('token');
     var data = { cart_item_key : cart_item_key }
@@ -64,6 +80,22 @@ export const updateCart = ( cart_item_key, qty ) =>{
     return new Promise((resolve, reject) => {
         postData('wp-json/cocart/v1/item', req , token).then((result) => {
             resolve(result)
+        })
+    });
+}
+
+export const createOrder = (data) => {
+    return new Promise((resolve, reject) => {
+        WooCommerceV3.post('orders',data).then(function(result) {
+            resolve(JSON.parse(result.toJSON().body));
+        })
+    });
+}
+
+export const getProduct = (id) => {
+    return new Promise((resolve, reject) => {
+        WooCommerce.getAsync('products/'+id).then(function(result) {
+            resolve(JSON.parse(result.toJSON().body));
         })
     });
 }

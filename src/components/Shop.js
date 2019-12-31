@@ -162,7 +162,6 @@ class Shop extends Component {
                   <h2 className="title text-center">Features Items</h2>
                   {this.state.items.map((val, index) => (
                     <div className="col-sm-4">
-                      {console.log(val.type)}
                       <div className="product-image-wrapper">
                         <div className="single-products">
                           <div id={val.id} className="productinfo text-center">

@@ -301,7 +301,7 @@ class SingleProduct extends Component {
 									<span>${ this.state.variation_price || this.state.productDetails.price }</span>
 									<label>Quantity:</label>
 									<input onChange={(e) => this.handleChange('quantity',e.target.value)} type="number" value={ this.state.quantity || 1 } />
-									<button type="button" className="btn btn-fefault cart" style={{pointerEvents:  ( !product_types.includes(this.state.product)  ||  this.state.variation_id) ? 'auto' : 'none' }} onClick={ () => addToCart(this.state.product_id , this.state.quantity, this.state.variation_id) }>
+									<button type="button" className="btn btn-fefault cart" disabled={ ( !product_types.includes(this.state.product)  ||  this.state.variation_id) ? '' : 'disabled' } onClick={ () => addToCart(this.state.product_id , this.state.quantity, this.state.variation_id) }>
 										<i className="fa fa-shopping-cart"></i>
 										Add to cart
 									</button>

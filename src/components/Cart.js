@@ -2,8 +2,7 @@ import React, { Component } from "react";
 import Header from "./Header.js";
 import { WooCommerce } from "../service/WoocommerceConnection.js";
 import Footer from "./Footer.js";
-import { getCartContent , getCartTotals , getCurrentCurrency } from "../service/WoocommerceFunctions";
-import { removeCartItem , updateCart } from "../service/WoocommerceFunctions";
+import { removeCartItem , updateCart , getProduct , getCartContent , getCartTotals , getCurrentCurrency } from "../service/WoocommerceFunctions";
 import { Link } from "react-router-dom";
 
 class Cart extends Component {
@@ -48,9 +47,15 @@ class Cart extends Component {
     });
   }
 
+  getProductImage(id){
+    getProduct(id).then(result => {
+      return result;
+    })
+  }
+  
   componentDidMount() {
     getCartContent().then(result => {
-        console.log(result);
+        // console.log(result);
         this.setState({ cart: result, isLoaded: true });
     });
     getCartTotals().then(result => {
@@ -94,14 +99,13 @@ class Cart extends Component {
                       <tr>
                         <td className="cart_product">
                           <a href="">
-                            <img src="images/cart/one.png" alt="" />
+                            <img src="" alt="" />
                           </a>
                         </td>
                         <td className="cart_description">
                           <h4>
                             <a href="">{item.product_name}</a>
                           </h4>
-                          <p>Web ID: 1089772</p>
                         </td>
                         <td className="cart_price">
                           <p>{item.product_price}</p>

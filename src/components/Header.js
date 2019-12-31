@@ -130,9 +130,9 @@ class Header extends Component {
                   </a>
                 </li>
                 <li>
-                  <a href="checkout.html">
-                    <i className="fa fa-crosshairs"></i> Checkout
-                  </a>
+                  <Link to={"/checkout/"}>
+                      <i className="fa fa-crosshairs"></i> Checkout
+                  </Link>
                 </li>
                 <li>
                   <Link to="/cart">
