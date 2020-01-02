@@ -99,3 +99,11 @@ export const getProduct = (id) => {
         })
     });
 }
+
+export const getUserByEmail = (email) => {
+    return new Promise((resolve, reject) => {
+    WooCommerceV3.getAsync("customers?email="+email).then(function(result) {
+        resolve(JSON.parse(result.toJSON().body));
+    })
+    });
+}

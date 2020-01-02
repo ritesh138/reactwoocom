@@ -5,8 +5,6 @@ import { WooCommerce } from "./../service/WoocommerceConnection.js";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
 import { getCartContent , getCartTotals , getCurrentCurrency , getAllCountries , getAllStates , createOrder } from "../service/WoocommerceFunctions";
-import { removeCartItem , updateCart } from "../service/WoocommerceFunctions";
-import { addToCart } from "./../service/WoocommerceFunctions";
 
 class Checkout extends Component {
   constructor(props) {
@@ -60,7 +58,7 @@ class Checkout extends Component {
 		<div className="container">
 			<div className="breadcrumbs">
 				<ol className="breadcrumb">
-				  <li><a href="#">Home</a></li>
+				  <li><a href="javascript:void(0)">Home</a></li>
 				  <li className="active">Check out</li>
 				</ol>
 			</div>
@@ -72,10 +70,10 @@ class Checkout extends Component {
 						<div className="billing-info">
 							<p>Billing Information</p>
 							<div className="col-sm-6 col-lg-6">
-								<label for="billing_first_name">First Name<input type="text" name="billing_first_name" id="billing_first_name" placeholder="First Name" /></label>
+								<label for="billing_first_name">First Name<input type="text" name="billing_first_name" id="billing_first_name" placeholder="First Name" onChange={ this.handleChange } value={ this.state.billing_first_name }/></label>
 							</div>
 							<div className="col-sm-6 col-lg-6">
-								<label for="billing_last_name">Last Name<input type="text" name="billing_last_name" id="billing_last_name" placeholder="Last Name" /></label>
+								<label for="billing_last_name">Last Name<input type="text" name="billing_last_name" id="billing_last_name" placeholder="Last Name" onChange={ this.handleChange } value={ this.state.billing_last_name }/></label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
 								<label for="billing_company">Company Name<input type="text" name="billing_company" id="billing_company" placeholder="Company Name" /></label>
@@ -217,7 +215,7 @@ class Checkout extends Component {
 			<div className="row">
 				<div className="col-sm-12 col-lg-12">
 					<div className="place_order_btn">
-						<button className="btn btn-fefault">Place Order</button>
+						<button type="button" className="btn btn-fefault">Place Order</button>
 					</div>
 				</div>
 			</div>

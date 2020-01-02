@@ -3,6 +3,7 @@ import { WooCommerce } from "./../service/WoocommerceConnection.js";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
 import { postData } from "./../service/Common.js";
+import { getUserByEmail } from "../service/WoocommerceFunctions";
 
 class Login extends Component {
   constructor(props) {
@@ -30,6 +31,7 @@ class Login extends Component {
       if (result.token) {
         localStorage.setItem("token", result.token);
         localStorage.setItem("display_name", result.user_display_name);
+        this.userDetails(result.user_email);
         this.setState({
           message: "User login successfully",
           redirectLogin: true
@@ -55,6 +57,25 @@ class Login extends Component {
       }
     });
   };
+
+  userDetails(email) {
+    getUserByEmail(email).then(result => {
+      localStorage.setItem("user_id",result[0].id);
+    })
+  }
+
+  getAdminToken(){
+    var req = { username: 'admin', password: 'test123G' };
+    postData("wp-json/jwt-auth/v1/token", req).then(result => {
+      if (result.token) {
+        localStorage.setItem("admin_token", result.token);
+      }
+    });
+  }
+
+  componentDidMount() {
+    this.getAdminToken();
+  }
 
   render() {
     return (
