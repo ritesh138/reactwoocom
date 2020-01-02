@@ -16,22 +16,109 @@ class Checkout extends Component {
 	  totals: [],
 	  currencySymbol: '',
 	  countries: [],
-	  states: [],
-	  different_shipping: true
+	  billing_states: [],
+	  shipping_states:[],
+	  different_shipping: false,
+	  billing_first_name: '',
+	  billing_last_name: '',
+	  billing_company: '',
+	  billing_country: '',
+	  billing_address_1: '',
+	  billing_address_2: '',
+	  billing_city: '',
+	  billing_state: '',
+	  billing_postcode: '',
+	  billing_phone: '',
+	  billing_email: '',
+	  shipping_first_name: '',
+	  shipping_last_name: '',
+	  shipping_company: '',
+	  shipping_country: '',
+	  shipping_address_1: '',
+	  shipping_address_2: '',
+	  shipping_city: '',
+	  shipping_state: '',
+	  shipping_postcode: '',
+	  order_comments: ''
     };
   }
 
   handleChange = e => {
-	if( ('billing_country' == e.target.name ) || ( 'shipping_country' == e.target.name ) )
+	if( ('billing_country' == e.target.name ) && ( 'select' != e.target.value ) )
 	{
 		getAllStates(e.target.value).then(result => {
-			this.setState({ states: result.states });
+			this.setState({ billing_states: result.states });
 		});
 	}
-	else if( 'different_shipping' == e.target.name )
+	else if( ('shipping_country' == e.target.name ) && ( 'select' != e.target.value ) )
+	{
+		getAllStates(e.target.value).then(result => {
+			this.setState({ shipping_states: result.states });
+		});
+	}
+	if( 'different_shipping' == e.target.name )
 	{
 		this.setState({ different_shipping: !this.state.different_shipping });
 	}
+	var state = {};
+    state[e.target.name] =
+      e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    this.setState(state);
+  }
+
+  checkoutProcess() {
+	var req = { 'billing' : {
+		first_name : this.state.billing_first_name,
+		last_name : this.state.billing_last_name,
+		company : this.state.billing_company,
+		country : this.state.billing_country,
+		address_1 : this.state.billing_address_1,
+		address_2 : this.state.billing_address_2,
+		city : this.state.billing_city,
+		state : this.state.billing_state,
+		postcode : this.state.billing_postcode,
+		phone : this.state.billing_phone,
+		email : this.state.billing_email
+		}
+	}
+	if( this.state.different_shipping )
+	{
+		req['shipping'] = {
+			first_name : this.state.shipping_first_name,
+			last_name : this.state.shipping_last_name,
+			company : this.state.shipping_company,
+			country : this.state.shipping_country,
+			address_1 : this.state.shipping_address_1,
+			address_2 : this.state.shipping_address_2,
+			city : this.state.shipping_city,
+			state : this.state.shipping_state,
+			postcode : this.state.shipping_postcode
+		}
+	}
+	if( this.state.order_comments )
+	{
+		req['customer_note'] = this.state.order_comments
+	}
+	
+	var temp_items = [];
+	Object.values(this.state.cart).map((item, i) => {
+		var line_items = {};
+		line_items['product_id'] = item.product_id
+		line_items['quantity'] = item.quantity
+		temp_items.push(line_items)
+	})
+	
+	req['line_items'] = temp_items
+	req['payment_method'] = "bacs"
+	req['set_paid'] = true
+	req['shipping_lines'] = [{
+		method_id: "free_shipping",
+		method_title: "Free Shipping",
+		total: "0"
+	  }]
+	createOrder(req).then(result => {
+        console.log(result)
+    });
   }
 
   componentDidMount() {
@@ -70,18 +157,18 @@ class Checkout extends Component {
 						<div className="billing-info">
 							<p>Billing Information</p>
 							<div className="col-sm-6 col-lg-6">
-								<label for="billing_first_name">First Name<input type="text" name="billing_first_name" id="billing_first_name" placeholder="First Name" onChange={ this.handleChange } value={ this.state.billing_first_name }/></label>
+								<label htmlFor="billing_first_name">First Name<input type="text" name="billing_first_name" id="billing_first_name" placeholder="First Name" onChange={ this.handleChange } value={ this.state.billing_first_name }/></label>
 							</div>
 							<div className="col-sm-6 col-lg-6">
-								<label for="billing_last_name">Last Name<input type="text" name="billing_last_name" id="billing_last_name" placeholder="Last Name" onChange={ this.handleChange } value={ this.state.billing_last_name }/></label>
+								<label htmlFor="billing_last_name">Last Name<input type="text" name="billing_last_name" id="billing_last_name" placeholder="Last Name" onChange={ this.handleChange } value={ this.state.billing_last_name }/></label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="billing_company">Company Name<input type="text" name="billing_company" id="billing_company" placeholder="Company Name" /></label>
+								<label htmlFor="billing_company">Company Name<input type="text" name="billing_company" id="billing_company" placeholder="Company Name" onChange={ this.handleChange } value={ this.state.billing_company } /></label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="bbilling_country"> Country
-								<select name="billing_country" id="billing_country" value={this.state.selectedCountry} onChange={this.handleChange}>
-								<option>-- Country --</option>
+								<label htmlFor="bbilling_country"> Country
+								<select name="billing_country" id="billing_country" value={this.state.billing_country} onChange={this.handleChange}>
+								<option value="select">-- Country --</option>
 								{this.state.countries.map((item, i) => (
 								<option value={item.code}>{item.name}</option>
 								))}
@@ -89,32 +176,32 @@ class Checkout extends Component {
 								</label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="billing_address_1">Street Address<input type="text" name="billing_address_1" id="billing_address_1" placeholder="Street Address1" /></label>
+								<label htmlFor="billing_address_1">Street Address<input type="text" name="billing_address_1" id="billing_address_1" value={this.state.billing_address_1} onChange={this.handleChange} placeholder="Street Address1" /></label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-							<input type="text" name="billing_address_2" id="billing_address_2" placeholder="Street Address2" />
+							<input type="text" name="billing_address_2" id="billing_address_2" placeholder="Street Address2" value={this.state.billing_address_2} onChange={this.handleChange}/>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="billing_city">Town/City<input type="text" name="billing_city" id="billing_city" placeholder="City" /></label>
+								<label htmlFor="billing_city">Town/City<input type="text" name="billing_city" id="billing_city" placeholder="City" value={this.state.billing_city} onChange={this.handleChange}/></label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="billing_state">State/County
-								<select name="billing_state" id="billing_state">
+								<label htmlFor="billing_state">State/County
+								<select name="billing_state" id="billing_state" value={this.state.billing_state} onChange={this.handleChange}>
 									<option>-- State / Province / Region --</option>
-									{this.state.states.map((item, i) => (
+									{ ( this.state.billing_country && 'select' != this.state.billing_country) ? this.state.billing_states.map((item, i) => (
 									<option value={item.code}>{item.name}</option>
-									))}
+									)): '' }
 								</select>
 								</label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="billing_postcode">PostCode / ZIP<input type="text" name="billing_postcode" id="billing_postcode" placeholder="Postcode" /></label>
+								<label htmlFor="billing_postcode">PostCode / ZIP<input type="text" name="billing_postcode" id="billing_postcode" value={this.state.billing_postcode} onChange={this.handleChange} placeholder="Postcode" /></label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="billing_phone">Phone<input type="text" name="billing_phone" id="billing_phone" placeholder="Phone" /></label>
+								<label htmlFor="billing_phone">Phone<input type="text" name="billing_phone" id="billing_phone" value={this.state.billing_phone} onChange={this.handleChange} placeholder="Phone" /></label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="billing_email">Email address<input type="text" name="billing_email" id="billing_email" placeholder="Email Address" /></label>
+								<label htmlFor="billing_email">Email address<input type="text" name="billing_email" id="billing_email" value={this.state.billing_email} onChange={this.handleChange} placeholder="Email Address" /></label>
 							</div>
 						</div>
 					</div>
@@ -122,51 +209,51 @@ class Checkout extends Component {
 					<div className="col-sm-6 col-lg-6 clearfix">
 					<div className="row">
 						<div><label><input type="checkbox" name="different_shipping" id="different_shipping" onChange={ this.handleChange } value={ this.state.different_shipping } /> SHIP TO A DIFFERENT ADDRESS?</label></div>
-						<div className="shipping-info" style={{ display: ( !this.state.different_shipping ) ? 'block' : 'none' }} >
+						<div className="shipping-info" style={{ display: ( this.state.different_shipping ) ? 'block' : 'none' }} >
 							<div className="col-sm-6 col-lg-6">
-								<label for="shipping_first_name">First Name<input type="text" name="shipping_first_name" id="shipping_first_name" placeholder="First Name" /></label>
+								<label htmlFor="shipping_first_name">First Name<input type="text" name="shipping_first_name" id="shipping_first_name" placeholder="First Name" value={this.state.shipping_first_name} onChange={this.handleChange} /></label>
 							</div>
 							<div className="col-sm-6 col-lg-6">
-								<label for="shipping_last_name">Last Name<input type="text" name="shipping_last_name" id="shipping_last_name" placeholder="Last Name" /></label>
+								<label htmlFor="shipping_last_name">Last Name<input type="text" name="shipping_last_name" id="shipping_last_name" placeholder="Last Name" value={this.state.shipping_last_name} onChange={this.handleChange} /></label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="shipping_company">Company Name<input type="text" name="shipping_company" id="shipping_company" placeholder="Company Name" /></label>
+								<label htmlFor="shipping_company">Company Name<input type="text" name="shipping_company" id="shipping_company" placeholder="Company Name" value={this.state.shipping_company} onChange={this.handleChange} /></label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="shipping_country"> Country
-								<select name="shipping_country" id="shipping_country" value={this.state.selectedCountry} onChange={this.handleChange} >
-									<option>-- Country --</option>
-									{this.state.countries.map((item, i) => (
+								<label htmlFor="shipping_country"> Country
+								<select name="shipping_country" id="shipping_country" value={this.state.shipping_country} onChange={this.handleChange} >
+									<option value="select">-- Country --</option>
+									{ this.state.countries.map((item, i) => (
 									<option value={item.code}>{item.name}</option>
 									))}
 								</select>
 								</label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="shipping_address_1">Street Address<input type="text" name="shipping_address_1" id="shipping_address_1" placeholder="Street Address1" /></label>
+								<label htmlFor="shipping_address_1">Street Address<input type="text" name="shipping_address_1" id="shipping_address_1" placeholder="Street Address1" value={this.state.shipping_address_1} onChange={this.handleChange}/></label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-							<input type="text" name="shipping_address_2" id="shipping_address_2" placeholder="Street Address2" />
+							<input type="text" name="shipping_address_2" id="shipping_address_2" placeholder="Street Address2" value={this.state.shipping_address_2} onChange={this.handleChange}/>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="shipping_city">Town/City<input type="text" name="shipping_city" id="shipping_city" placeholder="City" /></label>
+								<label htmlFor="shipping_city">Town/City<input type="text" name="shipping_city" id="shipping_city" placeholder="City" value={this.state.shipping_city} onChange={this.handleChange}/></label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="shipping_state">State/County
-								<select name="shipping_state" id="shipping_state">
+								<label htmlFor="shipping_state">State/County
+								<select name="shipping_state" id="shipping_state" value={this.state.shipping_state} onChange={this.handleChange}>
 									<option>-- State / Province / Region --</option>
-								    {this.state.states.map((item, i) => (
+								    {( this.state.shipping_country && 'select' != this.state.shipping_country ) ? this.state.shipping_states.map((item, i) => (
 									<option value={item.code}>{item.name}</option>
-									))}
+									)) : ''}
 								</select>
 								</label>
 							</div>
 							<div className="col-sm-12 col-lg-12">
-								<label for="shipping_postcode">PostCode / ZIP <input type="text" name="shipping_postcode" id="shipping_postcode" placeholder="Postcode" /></label>
+								<label htmlFor="shipping_postcode">PostCode / ZIP <input type="text" name="shipping_postcode" id="shipping_postcode" placeholder="Postcode"  value={this.state.shipping_postcode} onChange={this.handleChange}/></label>
 							</div>
 						</div>
 						<div className="col-sm-12 col-lg-12">
-							<label for="order_comments">Order Notes<textarea name="order_comments" id="order_comments" placeholder="order notes" rows="6"></textarea></label>
+							<label htmlFor="order_comments">Order Notes<textarea name="order_comments" id="order_comments" placeholder="order notes" rows="6" value={this.state.order_comments} onChange={this.handleChange}></textarea></label>
 						</div>
 					</div>
 					</div>				
@@ -197,7 +284,7 @@ class Checkout extends Component {
 						</tr>
 						<tr>
 							<td>Shipping</td>
-							<td>Flat rate</td>
+							<td>Free Shipping</td>
 						</tr>
 						<tr>
 							<td>Total</td>
@@ -215,7 +302,7 @@ class Checkout extends Component {
 			<div className="row">
 				<div className="col-sm-12 col-lg-12">
 					<div className="place_order_btn">
-						<button type="button" className="btn btn-fefault">Place Order</button>
+						<button type="button" className="btn btn-fefault" onClick={ () => this.checkoutProcess() }>Place Order</button>
 					</div>
 				</div>
 			</div>

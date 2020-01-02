@@ -86,10 +86,14 @@ export const updateCart = ( cart_item_key, qty ) =>{
 
 export const createOrder = (data) => {
     return new Promise((resolve, reject) => {
-        WooCommerceV3.post('orders',data).then(function(result) {
-            resolve(JSON.parse(result.toJSON().body));
-        })
-    });
+        var token = localStorage.getItem('admin_token');
+        data['customer_id'] = localStorage.getItem('user_id');
+        return new Promise((resolve, reject) => {
+            postData('wp-json/wc/v3/orders', data , token).then((result) => {
+                resolve(result)
+            })
+    })
+})
 }
 
 export const getProduct = (id) => {
