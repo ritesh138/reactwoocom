@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import { WooCommerce } from "./../service/WoocommerceConnection.js";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
-import { getCartContent , getCartTotals , getCurrentCurrency , getAllCountries , getAllStates , createOrder } from "../service/WoocommerceFunctions";
+import { getCartContent , getCartTotals , getCurrentCurrency , getAllCountries , getAllStates , createOrder, clearCart } from "../service/WoocommerceFunctions";
 
 class Checkout extends Component {
   constructor(props) {
@@ -117,7 +117,9 @@ class Checkout extends Component {
 		total: "0"
 	  }]
 	createOrder(req).then(result => {
-        console.log(result)
+		sessionStorage.setItem("order_id", result.id);
+		clearCart();
+		this.props.history.push("/thankyou");
     });
   }
 

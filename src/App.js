@@ -11,6 +11,7 @@ import ContactUs from "./components/ContactUs.js";
 import ProductCategories from "./components/ProductCategories.js";
 import SingleProduct from "./components/ProductDetails.js";
 import Checkout from "./components/Checkout.js";
+import ThankYou from "./components/Thankyou";
 
 class App extends Component {
   render() {
@@ -27,6 +28,7 @@ class App extends Component {
             <Route exact path="/category/:id" component={ProductCategories} />
             <Route exact path="/product/:id" component={SingleProduct} />
             <Route exact path="/checkout/" component={Checkout} />
+            <Route exact path="/thankyou/" component={ThankYou} />
           </div>
         </Router>
       </div>

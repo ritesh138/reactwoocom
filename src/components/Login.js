@@ -60,7 +60,7 @@ class Login extends Component {
 
   userDetails(email) {
     getUserByEmail(email).then(result => {
-      localStorage.setItem("user_id",result[0].id);
+      sessionStorage.setItem("user_id",result[0].id);
     })
   }
 
@@ -68,7 +68,7 @@ class Login extends Component {
     var req = { username: 'admin', password: 'test123G' };
     postData("wp-json/jwt-auth/v1/token", req).then(result => {
       if (result.token) {
-        localStorage.setItem("admin_token", result.token);
+        sessionStorage.setItem("admin_token", result.token);
       }
     });
   }

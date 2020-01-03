@@ -84,16 +84,24 @@ export const updateCart = ( cart_item_key, qty ) =>{
     });
 }
 
-export const createOrder = (data) => {
+
+export const clearCart = () =>{
+    var token = localStorage.getItem('token');
     return new Promise((resolve, reject) => {
-        var token = localStorage.getItem('admin_token');
-        data['customer_id'] = localStorage.getItem('user_id');
-        return new Promise((resolve, reject) => {
-            postData('wp-json/wc/v3/orders', data , token).then((result) => {
-                resolve(result)
-            })
+        postData('wp-json/cocart/v1/clear', '' , token).then((result) => {
+            resolve(result)
+        })
+    });
+}
+
+export const createOrder = (data) => {
+    var token = sessionStorage.getItem('admin_token');
+    data['customer_id'] = sessionStorage.getItem('user_id');
+    return new Promise((resolve, reject) => {
+        postData('wp-json/wc/v3/orders', data , token).then((result) => {
+            resolve(result)
+        })
     })
-})
 }
 
 export const getProduct = (id) => {
@@ -109,5 +117,13 @@ export const getUserByEmail = (email) => {
     WooCommerceV3.getAsync("customers?email="+email).then(function(result) {
         resolve(JSON.parse(result.toJSON().body));
     })
+    });
+}
+
+export const getOrderById = (order_id) => {
+    return new Promise((resolve, reject) => {
+        WooCommerceV3.getAsync("orders/"+order_id).then(function(result) {
+            resolve(JSON.parse(result.toJSON().body));
+        })
     });
 }

@@ -98,13 +98,13 @@ class Cart extends Component {
                     {Object.values(this.state.cart).map((item, i) => (
                       <tr>
                         <td className="cart_product">
-                          <a href="">
+                          <a href="javascript:void(0)">
                             <img src="" alt="" />
                           </a>
                         </td>
                         <td className="cart_description">
                           <h4>
-                            <a href="">{item.product_name}</a>
+                            <a href="javascript:void(0)">{item.product_name}</a>
                           </h4>
                         </td>
                         <td className="cart_price">

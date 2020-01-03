@@ -32,7 +32,6 @@ class ProductCategories extends Component {
   }
 
   getData(page) {
-    console.log(page);
     if (page) {
       var page = page;
     } else {
