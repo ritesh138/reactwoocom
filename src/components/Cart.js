@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import Header from "./Header.js";
-import { WooCommerce } from "../service/WoocommerceConnection.js";
 import Footer from "./Footer.js";
-import { removeCartItem , updateCart , getProduct , getCartContent , getCartTotals , getCurrentCurrency } from "../service/WoocommerceFunctions";
+import { removeCartItem , updateCart , getProduct , getCartContent , getCartTotals , getCurrentCurrency , getLocalcart } from "../service/WoocommerceFunctions";
 import { Link } from "react-router-dom";
 
 class Cart extends Component {
@@ -25,15 +24,37 @@ class Cart extends Component {
     this.setState(state);
   }
 
-  changeQty( cart_item_key , qty ){
-    updateCart(cart_item_key,qty).then(result => {
-      getCartContent().then(result => {
-          this.setState({ cart: result, isLoaded: true });
+  changeQty( cart_item_key , product_id , qty ){
+    var token = localStorage.getItem('token');
+    var cart = localStorage.getItem('cart_content');
+    if( token )
+    {
+      updateCart(cart_item_key,qty).then(result => {
+        getCartContent().then(result => {
+            this.setState({ cart: result, isLoaded: true });
+        });
+        getCartTotals().then(result => {
+          this.setState({ totals: result, isLoaded: true });
+        });
       });
-      getCartTotals().then(result => {
-        this.setState({ totals: result, isLoaded: true });
+    }
+    else{
+      var updated_cart = [];
+      JSON.parse(cart).map((val,index) => {
+          if( product_id  == val.product_id )
+          {
+            var line_item = { 'product_id' : val.product_id , 'quantity' : qty }
+          }
+          else{
+            var line_item = { 'product_id' : val.product_id , 'quantity' : val.quantity }
+          }
+          updated_cart.push(line_item);
+      })
+      localStorage.setItem('cart_content', JSON.stringify( updated_cart )  );
+      getLocalcart().then(result => {
+        this.setState({ cart: result, isLoaded: true });
       });
-    });
+    }
   }
 
   removeItem(cart_item_key){
@@ -49,22 +70,35 @@ class Cart extends Component {
 
   getProductImage(id){
     getProduct(id).then(result => {
-      return result;
+      return ( result );
     })
   }
   
   componentDidMount() {
-    getCartContent().then(result => {
-        // console.log(result);
-        this.setState({ cart: result, isLoaded: true });
-    });
     getCartTotals().then(result => {
       // console.log(result);
       this.setState({ totals: result, isLoaded: true });
     });
+
     getCurrentCurrency().then(result => {
       this.setState({ currencySymbol: result.symbol, isLoaded: true });
     });
+
+    var token = localStorage.getItem('token');
+    if( token )
+    {
+      getCartContent().then(result => {
+        // console.log(result);
+        this.setState({ cart: result, isLoaded: true });
+      });
+    }
+    else{
+      getLocalcart().then(result => {
+        // console.log(result);
+        this.setState({ cart: result, isLoaded: true });
+      });
+      // this.setState({ cart: localCart, isLoaded: true });
+    }
   }
 
   render() {
@@ -108,11 +142,11 @@ class Cart extends Component {
                           </h4>
                         </td>
                         <td className="cart_price">
-                          <p>{item.product_price}</p>
+                          <p>{ item.product_price }</p>
                         </td>
                         <td className="cart_quantity">
                           <div className="cart_quantity_button">
-                            <a className="cart_quantity_down" href="javascript:void(0)" onClick={() => this.changeQty( item.key , --item.quantity )}> - </a>
+                            <a className="cart_quantity_down" href="javascript:void(0)" onClick={() => this.changeQty( item.key , item.product_id , --item.quantity )}> - </a>
                             <input
                               className="cart_quantity_input"
                               type="text"
@@ -121,7 +155,7 @@ class Cart extends Component {
                               value={ item.quantity }
                               size="2"
                             />
-                            <a className="cart_quantity_up" href="javascript:void(0)" onClick={() => this.changeQty( item.key , ++item.quantity)} > + </a>
+                            <a className="cart_quantity_up" href="javascript:void(0)" onClick={() => this.changeQty(  item.key , item.product_id , ++item.quantity)} > + </a>
                           </div>
                         </td>
                         <td className="cart_total">

@@ -3,17 +3,25 @@ import { WooCommerce , WooCommerceV3 } from "./WoocommerceConnection";
 import { postData , getData , deleteData } from "./Common";
 import Notifications, {notify} from 'react-notify-toast';
 
+var cart_content = [];
+
 export const addToCart = (product_id, qty , variation_id ) =>{
     var token = localStorage.getItem('token');
+   
+    if( !qty )
+    {
+        qty = 1;
+    }
+
+    if(variation_id){
+        var req = {product_id:product_id,quantity:qty,variation_id:variation_id}
+    }
+    else{
+        var req = {product_id:product_id,quantity:qty}
+    }
     
     if( token )
     {
-        if(variation_id){
-            var req = {product_id:product_id,quantity:qty,variation_id:variation_id}
-        }
-        else{
-            var req = {product_id:product_id,quantity:qty}
-        }
         postData('wp-json/cocart/v1/add-item', req , token).then((result) => {
             if(result.product_id){
                 notify.show('Added to cart!');
@@ -24,7 +32,9 @@ export const addToCart = (product_id, qty , variation_id ) =>{
         })
     }
     else{
-        
+        cart_content.push(req); 
+        localStorage.setItem("cart_content",JSON.stringify(cart_content));
+        notify.show('Added to cart!');
     }
 }
 
@@ -132,4 +142,29 @@ export const getOrderById = (order_id) => {
             resolve(JSON.parse(result.toJSON().body));
         })
     });
+}
+
+export const Logout = () =>{
+    localStorage.removeItem("token");
+}
+
+export const getLocalcart = () => {
+    var cart_content = [];
+    var temp_obj = {};
+    var cart = localStorage.getItem('cart_content');
+    return new Promise((resolve, reject) => {
+    JSON.parse(cart).map((val,index) => {
+      getProduct(val.product_id).then(result => {
+       temp_obj['product_id'] = result.id;
+       temp_obj['variation_id'] = val.variation_id;
+       temp_obj['quantity'] = val.quantity;
+       temp_obj['product_name'] = result.name;
+       temp_obj['product_price'] = result.price;
+       temp_obj['line_subtotal'] = parseFloat( result.price ) * val.quantity;
+       cart_content.push(temp_obj);
+       temp_obj = {};
+      })
+    })
+    resolve(cart_content);
+    })
 }

@@ -30,7 +30,6 @@ class Login extends Component {
     postData("wp-json/jwt-auth/v1/token", req).then(result => {
       if (result.token) {
         localStorage.setItem("token", result.token);
-        localStorage.setItem("display_name", result.user_display_name);
         this.userDetails(result.user_email);
         this.setState({
           message: "User login successfully",

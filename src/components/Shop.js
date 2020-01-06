@@ -178,7 +178,7 @@ class Shop extends Component {
                             >
                             <i className="fa fa-shopping-cart"></i>Add to cart
                             </a>
-                            <Link class="btn btn-default add-to-cart" style={{display:  ( product_types.includes(val.type) ) ? 'block' : 'none' }} to={"/product/" + val.id}>
+                            <Link className="btn btn-default add-to-cart" style={{display:  ( product_types.includes(val.type) ) ? 'block' : 'none' }} to={"/product/" + val.id}>
                               select option
                             </Link>
                           </div>
@@ -203,11 +203,11 @@ class Shop extends Component {
                       </div>
                     </div>
                   ))}
-                  <ul class="pagination">
+                  <ul className="pagination">
                     {table.map((val, index) => (
                       <li className="active">
                         <a
-                          href="javascript:void(0);"
+                          href="javascript:void(0)"
                           onClick={() => {
                             return this.getData(index + 1);
                           }}

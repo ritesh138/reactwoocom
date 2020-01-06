@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { Logout } from "../service/WoocommerceFunctions";
 
 class Header extends Component {
   constructor(props) {
@@ -12,6 +13,7 @@ class Header extends Component {
   }
  
   render() {
+    var token = localStorage.getItem('token');
     return (<header id="header">
     <div className="header_top">
       <div className="container">
@@ -140,9 +142,11 @@ class Header extends Component {
                     </Link>
                 </li>
                 <li>
+                  { ( !token ) ?
                   <Link to="/login">
                     <i className="fa fa-lock"></i> Login
-                  </Link>
+                  </Link> : <Link onClick={ () => Logout() } to="/login">Logout</Link>
+                  }
                 </li>
               </ul>
             </div>
