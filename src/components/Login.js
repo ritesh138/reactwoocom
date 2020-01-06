@@ -36,6 +36,7 @@ class Login extends Component {
           message: "User login successfully",
           redirectLogin: true
         });
+        // this.props.history.push("/myaccount");
       } else if (result.data.status === 403) {
         this.setState({ message: result.message });
       }

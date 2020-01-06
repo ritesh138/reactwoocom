@@ -5,21 +5,27 @@ import Notifications, {notify} from 'react-notify-toast';
 
 export const addToCart = (product_id, qty , variation_id ) =>{
     var token = localStorage.getItem('token');
-
-    if(variation_id){
-        var req = {product_id:product_id,quantity:qty,variation_id:variation_id}
-    }
-    else{
-        var req = {product_id:product_id,quantity:qty}
-    }
-    postData('wp-json/cocart/v1/add-item', req , token).then((result) => {
-		if(result.product_id){
-            notify.show('Added to cart!');
+    
+    if( token )
+    {
+        if(variation_id){
+            var req = {product_id:product_id,quantity:qty,variation_id:variation_id}
         }
         else{
-
+            var req = {product_id:product_id,quantity:qty}
         }
-    })
+        postData('wp-json/cocart/v1/add-item', req , token).then((result) => {
+            if(result.product_id){
+                notify.show('Added to cart!');
+            }
+            else{
+
+            }
+        })
+    }
+    else{
+        
+    }
 }
 
 export const getCartContent = () => {
