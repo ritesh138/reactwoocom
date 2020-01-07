@@ -100,7 +100,6 @@ export const updateCart = ( cart_item_key, qty ) =>{
     });
 }
 
-
 export const clearCart = () =>{
     var token = localStorage.getItem('token');
     return new Promise((resolve, reject) => {
@@ -146,6 +145,7 @@ export const getOrderById = (order_id) => {
 
 export const Logout = () =>{
     localStorage.removeItem("token");
+    sessionStorage.removeItem("user_id");
 }
 
 export const getLocalcart = () => {
@@ -166,5 +166,14 @@ export const getLocalcart = () => {
       })
     })
     resolve(cart_content);
+    })
+}
+
+export const signUp = (req) => {
+    var token = sessionStorage.getItem('admin_token');
+    return new Promise((resolve, reject) => {
+        postData("wp-json/wc/v3/customers", req , token).then((result) => {
+            resolve(result)
+        })
     })
 }

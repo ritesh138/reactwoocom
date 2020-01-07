@@ -426,7 +426,7 @@ class Home extends Component {
                 <div className="features_items">
                   <h2 className="title text-center">Features Items</h2>
                   {this.state.items.map((val, index) => (
-                    <div className="col-sm-4">
+                    <div className="col-sm-4" key={val.id}>
                       <div className="product-image-wrapper">
                         <div className="single-products">
                           <div className="productinfo text-center">

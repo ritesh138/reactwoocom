@@ -3,7 +3,7 @@ import { WooCommerce } from "./../service/WoocommerceConnection.js";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
 import { postData } from "./../service/Common.js";
-import { getUserByEmail } from "../service/WoocommerceFunctions";
+import { getUserByEmail , signUp } from "../service/WoocommerceFunctions";
 
 class Login extends Component {
   constructor(props) {
@@ -25,8 +25,10 @@ class Login extends Component {
     this.setState(state);
   };
 
-  loginUser = () => {
-    var req = { username: this.state.username, password: this.state.password };
+  loginUser = (req) => {
+    if(!req){
+      var req = { username: this.state.username, password: this.state.password };
+    }
     postData("wp-json/jwt-auth/v1/token", req).then(result => {
       if (result.token) {
         localStorage.setItem("token", result.token);
@@ -37,22 +39,6 @@ class Login extends Component {
         });
         // this.props.history.push("/myaccount");
       } else if (result.data.status === 403) {
-        this.setState({ message: result.message });
-      }
-    });
-  };
-
-  registerUser = () => {
-    var req = {
-      username: this.state.reguser,
-      password: this.state.regpass,
-      email: this.state.email
-    };
-
-    postData("wp-json/wp/v2/users", req).then(result => {
-      console.log(result);
-      if (result.token) {
-      } else if (result.data.status === 401) {
         this.setState({ message: result.message });
       }
     });
@@ -71,6 +57,24 @@ class Login extends Component {
         sessionStorage.setItem("admin_token", result.token);
       }
     });
+  }
+
+  registerUser(){
+    let req = {
+        username: this.state.reguser,
+        email: this.state.email,
+        password: this.state.regpass 
+      }
+      signUp(req).then(result => {
+        if(result.id )
+        {
+          this.loginUser(req);
+          this.setState({
+            message1: "Register user successfully",
+            redirectLogin: true
+          });
+        }
+      });
   }
 
   componentDidMount() {
@@ -120,31 +124,32 @@ class Login extends Component {
               <div className="col-sm-4">
                 <div className="signup-form">
                   <h2>New User Signup!</h2>
+                  {this.state.message1}
                   <form action="#">
                     <input
                       type="text"
                       name="reguser"
                       placeholder="Name"
                       onChange={this.handleChange}
-                      value={this.state.reguser || ""}
+                      value={this.state.reguser}
                     />
                     <input
                       type="email"
                       name="email"
                       placeholder="Email Address"
                       onChange={this.handleChange}
-                      value={this.state.email || ""}
+                      value={this.state.email}
                     />
                     <input
                       type="password"
                       name="regpass"
                       placeholder="Password"
                       onChange={this.handleChange}
-                      value={this.state.regpass || ""}
+                      value={this.state.regpass}
                     />
                     <button
                       type="button"
-                      onClick={this.registerUser}
+                      onClick={ () => this.registerUser() }
                       className="btn btn-default"
                     >
                       Signup

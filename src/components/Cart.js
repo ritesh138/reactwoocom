@@ -52,9 +52,15 @@ class Cart extends Component {
       })
       localStorage.setItem('cart_content', JSON.stringify( updated_cart )  );
       getLocalcart().then(result => {
-        this.setState({ cart: result, isLoaded: true });
+        this.setState({ cart: result  },function(){
+          this.componentDidMount();
+        })
       });
     }
+  }
+
+  componentDidUpdate(prevProps) {
+    
   }
 
   removeItem(cart_item_key){
@@ -129,8 +135,8 @@ class Cart extends Component {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.values(this.state.cart).map((item, i) => (
-                      <tr>
+                    {Object.values(this.state.cart).map((item) => (
+                      <tr key={ item.product_id }>
                         <td className="cart_product">
                           <a href="javascript:void(0)">
                             <img src="" alt="" />
