@@ -80,14 +80,24 @@ export const getAllStates = (id) => {
     });
 }
 
-export const removeCartItem = ( cart_item_key ) => {
+export const removeCartItem = ( cart_item_key , product_id , variation_id ) => {
     var token = localStorage.getItem('token');
-    var data = { cart_item_key : cart_item_key }
-    return new Promise((resolve, reject) => {
-        deleteData('wp-json/cocart/v1/item', data , token).then((result) => {
-            resolve(result);
-        })
-    });
+    if( token )
+    {
+        var data = { cart_item_key : cart_item_key }
+        return new Promise((resolve, reject) => {
+            deleteData('wp-json/cocart/v1/item', data , token).then((result) => {
+                resolve(result);
+            })
+        });
+    }
+    else{
+        return new Promise((resolve, reject) => {
+            var cart = localStorage.getItem('cart_content');
+            cart = JSON.parse(cart).filter((item, i) => ( item.product_id !== product_id ) || ( item.variation_id && item.variation_id !== variation_id));
+            resolve(cart)
+        });
+    }
 }
 
 export const updateCart = ( cart_item_key, qty ) =>{
@@ -152,21 +162,24 @@ export const getLocalcart = () => {
     var cart_content = [];
     var temp_obj = {};
     var cart = localStorage.getItem('cart_content');
-    return new Promise((resolve, reject) => {
-    JSON.parse(cart).map((val,index) => {
-      getProduct(val.product_id).then(result => {
-       temp_obj['product_id'] = result.id;
-       temp_obj['variation_id'] = val.variation_id;
-       temp_obj['quantity'] = val.quantity;
-       temp_obj['product_name'] = result.name;
-       temp_obj['product_price'] = result.price;
-       temp_obj['line_subtotal'] = parseFloat( result.price ) * val.quantity;
-       cart_content.push(temp_obj);
-       temp_obj = {};
-      })
-    })
-    resolve(cart_content);
-    })
+
+    if( cart ) {
+        return new Promise((resolve, reject) => {
+        JSON.parse(cart).map((val,index) => {
+        getProduct(val.product_id).then(result => {
+        temp_obj['product_id'] = result.id;
+        temp_obj['variation_id'] = val.variation_id;
+        temp_obj['quantity'] = val.quantity;
+        temp_obj['product_name'] = result.name;
+        temp_obj['product_price'] = result.price;
+        temp_obj['line_subtotal'] = parseFloat( result.price ) * val.quantity;
+        cart_content.push(temp_obj);
+        temp_obj = {};
+        })
+        })
+        resolve(cart_content);
+        })
+    }
 }
 
 export const signUp = (req) => {
@@ -176,4 +189,15 @@ export const signUp = (req) => {
             resolve(result)
         })
     })
+}
+
+export const isCart = () => {
+    var cart = localStorage.getItem('cart_content');
+    if( cart )
+    {
+        return true;
+    }
+    else{
+        return false;
+    }
 }

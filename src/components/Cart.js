@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
-import { removeCartItem , updateCart , getProduct , getCartContent , getCartTotals , getCurrentCurrency , getLocalcart } from "../service/WoocommerceFunctions";
+import "./../App.css";
+import { removeCartItem , updateCart , getProduct , getCartContent , getCartTotals , getCurrentCurrency , getLocalcart , isCart } from "../service/WoocommerceFunctions";
 import { Link } from "react-router-dom";
 
 class Cart extends Component {
@@ -50,28 +51,43 @@ class Cart extends Component {
           }
           updated_cart.push(line_item);
       })
-      localStorage.setItem('cart_content', JSON.stringify( updated_cart )  );
+      localStorage.setItem('cart_content', JSON.stringify( updated_cart ) );
       getLocalcart().then(result => {
-        this.setState({ cart: result  },function(){
+        this.setState({ cart: result  } , function(){
           this.componentDidMount();
         })
       });
     }
   }
 
-  componentDidUpdate(prevProps) {
-    
+  shouldComponentUpdate(nextProps,nextState ) {
+    // console.log(nextState);
+    return true;
   }
 
-  removeItem(cart_item_key){
-    removeCartItem(cart_item_key).then(result => {
-      getCartContent().then(result => {
-          this.setState({ cart: result, isLoaded: true });
+  removeItem( cart_item_key , product_id , variation_id ){
+    var token = localStorage.getItem('token');
+    if( token )
+    {
+      removeCartItem(cart_item_key).then(result => {
+        getCartContent().then(result => {
+            this.setState({ cart: result, isLoaded: true });
+        });
+        getCartTotals().then(result => {
+          this.setState({ totals: result, isLoaded: true });
+        });
       });
-      getCartTotals().then(result => {
-        this.setState({ totals: result, isLoaded: true });
+    }
+    else{
+      removeCartItem(cart_item_key , product_id , variation_id ).then(result => {
+        localStorage.setItem('cart_content', JSON.stringify( result )  );
+        getLocalcart().then(res => {
+          this.setState({ cart: res} , function(){
+            this.componentDidMount();
+          });
+        })
       });
-    });
+    }
   }
 
   getProductImage(id){
@@ -99,11 +115,16 @@ class Cart extends Component {
       });
     }
     else{
-      getLocalcart().then(result => {
-        // console.log(result);
-        this.setState({ cart: result, isLoaded: true });
-      });
-      // this.setState({ cart: localCart, isLoaded: true });
+       if( isCart() )
+       {
+        getLocalcart().then(result => {
+          // console.log(result);
+            this.setState({ cart: result, isLoaded: true });
+        });
+       }
+       else{
+        this.setState({ cart: [], isLoaded: true });
+       }
     }
   }
 
@@ -135,7 +156,7 @@ class Cart extends Component {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.values(this.state.cart).map((item) => (
+                    { ( 0 < this.state.cart.length ) ? Object.values(this.state.cart).map((item) => (
                       <tr key={ item.product_id }>
                         <td className="cart_product">
                           <a href="javascript:void(0)">
@@ -168,12 +189,12 @@ class Cart extends Component {
                           <p className="cart_total_price" dangerouslySetInnerHTML={{ __html: this.state.currencySymbol + item.line_subtotal.toFixed(2) }} />
                         </td>
                         <td className="cart_delete">
-                          <a className="cart_quantity_delete" href="javascript:void(0)" onClick={() => this.removeItem(item.key)}>
+                          <a className="cart_quantity_delete" href="javascript:void(0)" onClick={() => this.removeItem(item.key,item.product_id,item.variation_id)}>
                             <i className="fa fa-times"></i>
                           </a>
                         </td>
                       </tr>
-                    ))}
+                    )) : <tr><td className="emptyClass" colSpan="6">Your cart is empty.</td></tr> }
                   </tbody>
                 </table>
               </div>

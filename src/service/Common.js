@@ -15,7 +15,6 @@ export function postData(url, request_data, token) {
   // var BASE_WITH_URL = 'http://localhost/add_to_cart.php';
   return new Promise((resolve, reject) => {
     fetch(BASE_WITH_URL, {
-      crossDomain : true,
       method: "POST",
       body: JSON.stringify(request_data),
       headers: headers
