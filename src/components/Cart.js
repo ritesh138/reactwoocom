@@ -60,11 +60,6 @@ class Cart extends Component {
     }
   }
 
-  shouldComponentUpdate(nextProps,nextState ) {
-    // console.log(nextState);
-    return true;
-  }
-
   removeItem( cart_item_key , product_id , variation_id ){
     var token = localStorage.getItem('token');
     if( token )
@@ -110,7 +105,6 @@ class Cart extends Component {
     if( token )
     {
       getCartContent().then(result => {
-        // console.log(result);
         this.setState({ cart: result, isLoaded: true });
       });
     }
@@ -156,7 +150,7 @@ class Cart extends Component {
                     </tr>
                   </thead>
                   <tbody>
-                    { ( 0 < this.state.cart.length ) ? Object.values(this.state.cart).map((item) => (
+                    { ( Object.keys(this.state.cart).length > 0 ) ? Object.values(this.state.cart).map((item) => (
                       <tr key={ item.product_id }>
                         <td className="cart_product">
                           <a href="javascript:void(0)">

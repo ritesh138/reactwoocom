@@ -7,6 +7,7 @@ var cart_content = [];
 
 export const addToCart = (product_id, qty , variation_id ) =>{
     var token = localStorage.getItem('token');
+    let myColor = { background: '#fe980f', text: "#FFFFFF" };
    
     if( !qty )
     {
@@ -24,7 +25,7 @@ export const addToCart = (product_id, qty , variation_id ) =>{
     {
         postData('wp-json/cocart/v1/add-item', req , token).then((result) => {
             if(result.product_id){
-                notify.show('Added to cart!');
+                notify.show('Added to cart!',"custom", 5000, myColor);
             }
             else{
 
@@ -34,7 +35,7 @@ export const addToCart = (product_id, qty , variation_id ) =>{
     else{
         cart_content.push(req); 
         localStorage.setItem("cart_content",JSON.stringify(cart_content));
-        notify.show('Added to cart!');
+        notify.show('Added to cart!',"custom", 5000, myColor);
     }
 }
 
@@ -93,8 +94,8 @@ export const removeCartItem = ( cart_item_key , product_id , variation_id ) => {
     }
     else{
         return new Promise((resolve, reject) => {
-            var cart = localStorage.getItem('cart_content');
-            cart = JSON.parse(cart).filter((item, i) => ( item.product_id !== product_id ) || ( item.variation_id && item.variation_id !== variation_id));
+            var cart = localStorage.getItem('cart_content')
+            cart = JSON.parse(cart).filter((item, i) => ( item.product_id != product_id ) || ( item.variation_id && item.variation_id != variation_id));
             resolve(cart)
         });
     }
@@ -120,11 +121,12 @@ export const clearCart = () =>{
 }
 
 export const createOrder = (data) => {
-    var token = sessionStorage.getItem('admin_token');
-    data['customer_id'] = sessionStorage.getItem('user_id');
     return new Promise((resolve, reject) => {
-        postData('wp-json/wc/v3/orders', data , token).then((result) => {
-            resolve(result)
+        getAdminToken().then(result => {
+            data['customer_id'] = sessionStorage.getItem('user_id');
+            postData('wp-json/wc/v3/orders', data , result.token).then((result) => {
+                resolve(result)
+            })
         })
     })
 }
@@ -183,10 +185,14 @@ export const getLocalcart = () => {
 }
 
 export const signUp = (req) => {
-    var token = sessionStorage.getItem('admin_token');
     return new Promise((resolve, reject) => {
-        postData("wp-json/wc/v3/customers", req , token).then((result) => {
-            resolve(result)
+        getAdminToken().then(result => {
+            if( result.token )
+            {
+                postData("wp-json/wc/v3/customers", req , result.token).then((result) => {
+                    resolve(result)
+                })
+            }
         })
     })
 }
@@ -200,4 +206,13 @@ export const isCart = () => {
     else{
         return false;
     }
+}
+
+export const getAdminToken = () => {
+    var req = { username: 'admin', password: 'test123G' };
+    return new Promise((resolve, reject) => {
+        postData("wp-json/jwt-auth/v1/token", req).then(result => {
+            resolve(result)
+        });
+    })
 }

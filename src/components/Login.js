@@ -26,10 +26,15 @@ class Login extends Component {
   };
 
   loginUser = (req) => {
-    if(!req){
-      var req = { username: this.state.username, password: this.state.password };
+  
+    var req_data = { username: this.state.username, password: this.state.password };
+
+    if( !req_data )
+    {
+      var req_data = req;
     }
-    postData("wp-json/jwt-auth/v1/token", req).then(result => {
+ 
+    postData("wp-json/jwt-auth/v1/token", req_data).then(result => {
       if (result.token) {
         localStorage.setItem("token", result.token);
         this.userDetails(result.user_email);
@@ -50,15 +55,6 @@ class Login extends Component {
     })
   }
 
-  getAdminToken(){
-    var req = { username: 'admin', password: 'test123G' };
-    postData("wp-json/jwt-auth/v1/token", req).then(result => {
-      if (result.token) {
-        sessionStorage.setItem("admin_token", result.token);
-      }
-    });
-  }
-
   registerUser(){
     let req = {
         username: this.state.reguser,
@@ -68,7 +64,6 @@ class Login extends Component {
       signUp(req).then(result => {
         if(result.id )
         {
-          this.loginUser(req);
           this.setState({
             message1: "Register user successfully",
             redirectLogin: true
@@ -78,7 +73,7 @@ class Login extends Component {
   }
 
   componentDidMount() {
-    this.getAdminToken();
+  
   }
 
   render() {

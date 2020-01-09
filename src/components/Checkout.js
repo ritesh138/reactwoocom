@@ -104,6 +104,7 @@ class Checkout extends Component {
 	Object.values(this.state.cart).map((item, i) => {
 		var line_items = {};
 		line_items['product_id'] = item.product_id
+		line_items['variation_id'] = item.variation_id
 		line_items['quantity'] = item.quantity
 		temp_items.push(line_items)
 	})
@@ -117,9 +118,13 @@ class Checkout extends Component {
 		total: "0"
 	  }]
 	createOrder(req).then(result => {
-		sessionStorage.setItem("order_id", result.id);
+		// sessionStorage.setItem("order_id", result.id);
 		clearCart();
-		this.props.history.push("/thankyou");
+
+		this.props.history.push({
+			pathname: '/thankyou',
+			data: { 'order_id' : result.id } // your data array of objects
+		})
     });
   }
 

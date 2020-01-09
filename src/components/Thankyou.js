@@ -22,17 +22,18 @@ class ThankYou extends Component {
     };
   }
 
-  getOrderData(){
-    var order_id = sessionStorage.getItem("order_id");
-    var order_id = 13014;
-    getOrderById(order_id).then(result => {
-        this.setState({ order: result, isLoaded: true })
-        console.log(result)
-    });
+  getOrderData(order_id){
+      getOrderById(order_id).then(result => {
+          this.setState({ order: result, isLoaded: true })
+      });
   }
 
   componentDidMount() {
-    this.getOrderData();
+    const { data } = this.props.location
+    if( data )
+    {
+      this.getOrderData(data.order_id);
+    }
   }
 
   render() {
