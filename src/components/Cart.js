@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
 import "./../App.css";
-import { removeCartItem , updateCart , getProduct , getCartContent , getCartTotals , getCurrentCurrency , getLocalcart , isCart } from "../service/WoocommerceFunctions";
+import { removeCartItem , updateCart , getProduct , getCartContent , getCartTotals , getCurrentCurrency , getLocalcart , isCart , getLocalTotals } from "../service/WoocommerceFunctions";
 import { Link } from "react-router-dom";
 
 class Cart extends Component {
@@ -25,7 +25,7 @@ class Cart extends Component {
     this.setState(state);
   }
 
-  changeQty( cart_item_key , product_id , qty ){
+  changeQty( cart_item_key , product_id , qty , variation_id ){
     var token = localStorage.getItem('token');
     var cart = localStorage.getItem('cart_content');
     if( token )
@@ -42,21 +42,30 @@ class Cart extends Component {
     else{
       var updated_cart = [];
       JSON.parse(cart).map((val,index) => {
-          if( product_id  == val.product_id )
+          if( variation_id && ( variation_id  == val.variation_id ) )
           {
-            var line_item = { 'product_id' : val.product_id , 'quantity' : qty }
+            val.quantity = qty
+            val.line_subtotal = parseFloat(val.product_price)*qty
+            var line_item = val
+          }
+          else if( !variation_id && (product_id == val.product_id ) )
+          {
+            val.quantity = qty
+            val.line_subtotal = parseFloat(val.product_price)*qty
+            var line_item = val
           }
           else{
-            var line_item = { 'product_id' : val.product_id , 'quantity' : val.quantity }
+            var line_item = val
           }
           updated_cart.push(line_item);
       })
       localStorage.setItem('cart_content', JSON.stringify( updated_cart ) );
       getLocalcart().then(result => {
-        this.setState({ cart: result  } , function(){
-          this.componentDidMount();
-        })
+        this.setState({ cart: result  })
       });
+      getLocalTotals().then(result =>{
+        this.setState({ cart: result  })
+      })
     }
   }
 
@@ -92,10 +101,6 @@ class Cart extends Component {
   }
   
   componentDidMount() {
-    getCartTotals().then(result => {
-      // console.log(result);
-      this.setState({ totals: result, isLoaded: true });
-    });
 
     getCurrentCurrency().then(result => {
       this.setState({ currencySymbol: result.symbol, isLoaded: true });
@@ -107,14 +112,20 @@ class Cart extends Component {
       getCartContent().then(result => {
         this.setState({ cart: result, isLoaded: true });
       });
+
+      getCartTotals().then(result => {
+        this.setState({ totals: result, isLoaded: true });
+      });
     }
     else{
        if( isCart() )
        {
         getLocalcart().then(result => {
-          // console.log(result);
             this.setState({ cart: result, isLoaded: true });
         });
+        getLocalTotals().then(result => {
+          this.setState({ totals: result, isLoaded: true });
+        })
        }
        else{
         this.setState({ cart: [], isLoaded: true });
@@ -167,7 +178,7 @@ class Cart extends Component {
                         </td>
                         <td className="cart_quantity">
                           <div className="cart_quantity_button">
-                            <a className="cart_quantity_down" href="javascript:void(0)" onClick={() => this.changeQty( item.key , item.product_id , --item.quantity )}> - </a>
+                            <a className="cart_quantity_down" href="javascript:void(0)" onClick={() => this.changeQty( item.key , item.product_id , --item.quantity , item.variation_id )}> - </a>
                             <input
                               className="cart_quantity_input"
                               type="text"
@@ -176,11 +187,11 @@ class Cart extends Component {
                               value={ item.quantity }
                               size="2"
                             />
-                            <a className="cart_quantity_up" href="javascript:void(0)" onClick={() => this.changeQty(  item.key , item.product_id , ++item.quantity)} > + </a>
+                            <a className="cart_quantity_up" href="javascript:void(0)" onClick={() => this.changeQty(  item.key , item.product_id , ++item.quantity , item.variation_id )} > + </a>
                           </div>
                         </td>
                         <td className="cart_total">
-                          <p className="cart_total_price" dangerouslySetInnerHTML={{ __html: this.state.currencySymbol + item.line_subtotal.toFixed(2) }} />
+                          <p className="cart_total_price" dangerouslySetInnerHTML={{ __html: this.state.currencySymbol + item.line_subtotal }} />
                         </td>
                         <td className="cart_delete">
                           <a className="cart_quantity_delete" href="javascript:void(0)" onClick={() => this.removeItem(item.key,item.product_id,item.variation_id)}>

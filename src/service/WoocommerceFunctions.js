@@ -1,13 +1,13 @@
 import React, { Component } from "react";
 import { WooCommerce , WooCommerceV3 } from "./WoocommerceConnection";
 import { postData , getData , deleteData } from "./Common";
-import Notifications, {notify} from 'react-notify-toast';
-
-var cart_content = [];
+import Notifications, {notify} from 'react-notify-toast'; 
 
 export const addToCart = (product_id, qty , variation_id ) =>{
     var token = localStorage.getItem('token');
+    var cart = localStorage.getItem('cart_content');
     let myColor = { background: '#fe980f', text: "#FFFFFF" };
+    var req = {}; var flag = 0;
    
     if( !qty )
     {
@@ -33,8 +33,44 @@ export const addToCart = (product_id, qty , variation_id ) =>{
         })
     }
     else{
-        cart_content.push(req); 
-        localStorage.setItem("cart_content",JSON.stringify(cart_content));
+        var cart_content = [];
+        if( variation_id )
+        {
+            var p_id = variation_id
+        }
+        else{
+            var p_id = product_id
+        }
+
+        if( isCart() )
+        {
+            JSON.parse(cart).map((val,index) => {
+                if( ( val.product_id == p_id ) || ( val.variation_id == p_id ) )
+                {
+                  val.quantity = Number(qty)+Number(val.quantity)
+                  val.line_subtotal = parseFloat(val.product_price)*val.quantity
+                  var line_item = val
+                  flag = 1
+                }
+                else{
+                  var line_item = val
+                }
+                cart_content.push(line_item);
+                localStorage.setItem("cart_content",JSON.stringify(cart_content));
+            })
+        }
+ 
+        if( flag == 0 )
+        {
+            getProduct(product_id, variation_id).then(result => {
+                console.log(result)
+                req['product_name'] = result.name;
+                req['product_price'] = result.price;
+                req['line_subtotal'] = parseFloat( result.price ) * qty;
+                cart_content.push(req); 
+                localStorage.setItem("cart_content",JSON.stringify(cart_content));
+            })
+        }
         notify.show('Added to cart!',"custom", 5000, myColor);
     }
 }
@@ -131,12 +167,34 @@ export const createOrder = (data) => {
     })
 }
 
-export const getProduct = (id) => {
-    return new Promise((resolve, reject) => {
-        WooCommerce.getAsync('products/'+id).then(function(result) {
-            resolve(JSON.parse(result.toJSON().body));
-        })
-    });
+export const getProduct = (product_id , variation_id) => {
+    if( variation_id )
+    {  
+        return new Promise((resolve, reject) => {
+            var option = '';
+            WooCommerce.getAsync('products/'+product_id).then(function(result) {
+                var data = JSON.parse(result.toJSON().body);
+
+                WooCommerceV3.getAsync('products/'+product_id+'/variations/'+variation_id).then(function(res) {
+                    var data1 = JSON.parse(res.toJSON().body);
+                    
+                    data1.attributes.map((val,index) =>{
+                        option = option +' '+val.option
+                    })
+                    data1.name = data.name+' '+option;
+                    resolve(data1);
+                })
+            })
+ 
+        });
+    }
+    else{
+        return new Promise((resolve, reject) => {
+            WooCommerce.getAsync('products/'+product_id).then(function(result) {
+                resolve(JSON.parse(result.toJSON().body));
+            })
+        });
+    }
 }
 
 export const getUserByEmail = (email) => {
@@ -161,25 +219,10 @@ export const Logout = () =>{
 }
 
 export const getLocalcart = () => {
-    var cart_content = [];
-    var temp_obj = {};
     var cart = localStorage.getItem('cart_content');
-
     if( cart ) {
         return new Promise((resolve, reject) => {
-        JSON.parse(cart).map((val,index) => {
-        getProduct(val.product_id).then(result => {
-        temp_obj['product_id'] = result.id;
-        temp_obj['variation_id'] = val.variation_id;
-        temp_obj['quantity'] = val.quantity;
-        temp_obj['product_name'] = result.name;
-        temp_obj['product_price'] = result.price;
-        temp_obj['line_subtotal'] = parseFloat( result.price ) * val.quantity;
-        cart_content.push(temp_obj);
-        temp_obj = {};
-        })
-        })
-        resolve(cart_content);
+        resolve(JSON.parse(cart));
         })
     }
 }
@@ -215,4 +258,38 @@ export const getAdminToken = () => {
             resolve(result)
         });
     })
+}
+
+export const getLocalTotals = () => {
+    var cart = localStorage.getItem('cart_content');
+    var total = 0; var all_totals = {};
+    return new Promise((resolve, reject) => {
+        JSON.parse(cart).map((val,index) => {
+            total += val.line_subtotal;
+            all_totals.subtotal = total;
+            all_totals.total = total;
+        })
+        resolve(all_totals);
+    })
+}
+
+export const isInCart = ( product_id ) =>{
+    if( isCart() )
+    {
+        var cart = localStorage.getItem('cart_content');
+        JSON.parse(cart).map((val,index) => {
+            if( product_id == val.variation_id )
+            {
+                return true;
+            }
+            else if( product_id  == val.product_id )
+            {
+                return true;
+            }
+            else{
+                return false;
+            }
+        })
+    } 
+    return false;
 }

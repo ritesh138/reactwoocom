@@ -3,7 +3,7 @@ import { WooCommerce } from "./../service/WoocommerceConnection.js";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
 import { postData } from "./../service/Common.js";
-import { getUserByEmail , signUp } from "../service/WoocommerceFunctions";
+import { getUserByEmail , signUp  , addToCart , isCart } from "../service/WoocommerceFunctions";
 
 class Login extends Component {
   constructor(props) {
@@ -29,6 +29,8 @@ class Login extends Component {
   
     var req_data = { username: this.state.username, password: this.state.password };
 
+    var cart = localStorage.getItem('cart_content');
+
     if( !req_data )
     {
       var req_data = req;
@@ -42,7 +44,13 @@ class Login extends Component {
           message: "User login successfully",
           redirectLogin: true
         });
-        // this.props.history.push("/myaccount");
+        if( isCart() )
+        {
+          JSON.parse(cart).map((val,index) => {
+            addToCart(val.product_id, val.quantity , val.variation_id )
+          })
+          localStorage.removeItem('cart_content');
+        }
       } else if (result.data.status === 403) {
         this.setState({ message: result.message });
       }
