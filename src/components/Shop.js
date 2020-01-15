@@ -4,6 +4,7 @@ import { WooCommerce } from "../service/WoocommerceConnection.js";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
 import { addToCart } from "../service/WoocommerceFunctions";
+import Notifications, {notify} from 'react-notify-toast'; 
 
 class Shop extends Component {
   constructor(props) {
@@ -42,6 +43,13 @@ class Shop extends Component {
         categories: JSON.parse(result.toJSON().body)
       });
     });
+  }
+
+  toCart( product_id ){
+    let myColor = { background: '#fe980f', text: "#FFFFFF" };
+    addToCart(product_id).then(function(result){
+      notify.show('Added to cart!',"custom", 5000, myColor);
+    })
   }
 
   componentDidMount() {
@@ -174,7 +182,7 @@ class Shop extends Component {
                              style={{display:  ( !product_types.includes(val.type) ) ? 'block' : 'none' }}
                               href="javascript:void(0)"
                               className="btn btn-default add-to-cart"
-                              onClick={() => addToCart(val.id)}
+                              onClick={() => this.toCart(val.id)}
                             >
                             <i className="fa fa-shopping-cart"></i>Add to cart
                             </a>

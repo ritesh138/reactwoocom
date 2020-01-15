@@ -3,6 +3,7 @@ import { WooCommerce } from "../service/WoocommerceConnection.js";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
 import { addToCart } from "../service/WoocommerceFunctions";
+import Notifications, {notify} from 'react-notify-toast';
 
 class SingleProduct extends Component {
   constructor({ match :{ params :{id} } }) {
@@ -97,6 +98,13 @@ class SingleProduct extends Component {
 		});
 	  });
 	}
+
+	toCart( product_id , quantity , variation_id ){
+		let myColor = { background: '#fe980f', text: "#FFFFFF" };
+		addToCart( product_id , quantity , variation_id ).then(function(result){
+		  notify.show('Added to cart!',"custom", 5000, myColor);
+		})
+	}	
 
     componentDidMount() {
 	    this.productData();
@@ -301,7 +309,7 @@ class SingleProduct extends Component {
 									<span>${ this.state.variation_price || this.state.productDetails.price }</span>
 									<label>Quantity:</label>
 									<input onChange={(e) => this.handleChange('quantity',e.target.value)} type="number" value={ this.state.quantity || 1 } />
-									<button type="button" className="btn btn-fefault cart" disabled={ ( !product_types.includes(this.state.product)  ||  this.state.variation_id) ? '' : 'disabled' } onClick={ () => addToCart(this.state.product_id , this.state.quantity, this.state.variation_id) }>
+									<button type="button" className="btn btn-fefault cart" disabled={ ( !product_types.includes(this.state.product)  ||  this.state.variation_id) ? '' : 'disabled' } onClick={ () => this.toCart(this.state.product_id , this.state.quantity, this.state.variation_id) }>
 										<i className="fa fa-shopping-cart"></i>
 										Add to cart
 									</button>

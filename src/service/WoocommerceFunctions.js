@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import { WooCommerce , WooCommerceV3 } from "./WoocommerceConnection";
 import { postData , getData , deleteData } from "./Common";
-import Notifications, {notify} from 'react-notify-toast'; 
 
 export const addToCart = (product_id, qty , variation_id ) =>{
     var token = localStorage.getItem('token');
     var cart = localStorage.getItem('cart_content');
-    let myColor = { background: '#fe980f', text: "#FFFFFF" };
+    
     var req = {}; var flag = 0;
    
     if( !qty )
@@ -23,13 +22,12 @@ export const addToCart = (product_id, qty , variation_id ) =>{
     
     if( token )
     {
-        postData('wp-json/cocart/v1/add-item', req , token).then((result) => {
-            if(result.product_id){
-                notify.show('Added to cart!',"custom", 5000, myColor);
-            }
-            else{
-
-            }
+        return new Promise((resolve, reject) => {
+            postData('wp-json/cocart/v1/add-item', req , token).then((result) => {
+                if(result.product_id){
+                    resolve('success');
+                }
+            })
         })
     }
     else{
@@ -71,7 +69,9 @@ export const addToCart = (product_id, qty , variation_id ) =>{
                 localStorage.setItem("cart_content",JSON.stringify(cart_content));
             })
         }
-        notify.show('Added to cart!',"custom", 5000, myColor);
+        return new Promise((resolve, reject) => {
+            return resolve('success');
+        })
     }
 }
 
@@ -252,7 +252,7 @@ export const isCart = () => {
 }
 
 export const getAdminToken = () => {
-    var req = { username: 'admin', password: 'test123G' };
+    var req = { username: 'admin', password: 'sunil1990' };
     return new Promise((resolve, reject) => {
         postData("wp-json/jwt-auth/v1/token", req).then(result => {
             resolve(result)
@@ -271,25 +271,4 @@ export const getLocalTotals = () => {
         })
         resolve(all_totals);
     })
-}
-
-export const isInCart = ( product_id ) =>{
-    if( isCart() )
-    {
-        var cart = localStorage.getItem('cart_content');
-        JSON.parse(cart).map((val,index) => {
-            if( product_id == val.variation_id )
-            {
-                return true;
-            }
-            else if( product_id  == val.product_id )
-            {
-                return true;
-            }
-            else{
-                return false;
-            }
-        })
-    } 
-    return false;
 }

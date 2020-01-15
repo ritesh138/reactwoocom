@@ -4,7 +4,8 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import { WooCommerce } from "./../service/WoocommerceConnection.js";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
-import { getCartContent , getCartTotals , getCurrentCurrency , getAllCountries , getAllStates , createOrder, clearCart } from "../service/WoocommerceFunctions";
+import { getCartContent , getCartTotals , getCurrentCurrency , getAllCountries , getAllStates , createOrder, clearCart , getLocalcart , isCart , getLocalTotals} from "../service/WoocommerceFunctions";
+import CardDemo from "./StripeComponent.js";
 
 class Checkout extends Component {
   constructor(props) {
@@ -129,12 +130,28 @@ class Checkout extends Component {
   }
 
   componentDidMount() {
-    getCartContent().then(result => {
-        this.setState({ cart: result, isLoaded: true });
-    });
-    getCartTotals().then(result => {
-      this.setState({ totals: result, isLoaded: true });
-    });
+	var token = localStorage.getItem('token');
+	if( token )
+	{
+		getCartContent().then(result => {
+			this.setState({ cart: result, isLoaded: true });
+		});
+		getCartTotals().then(result => {
+		  this.setState({ totals: result, isLoaded: true });
+		});
+	}
+	else{
+		if( isCart() )
+		{
+		 getLocalcart().then(result => {
+		   this.setState({ cart: result, isLoaded: true });
+		 });
+		 getLocalTotals().then(result => {
+		   this.setState({ totals: result, isLoaded: true });
+		 })
+		}
+	}
+
     getCurrentCurrency().then(result => {
       this.setState({ currencySymbol: result.symbol, isLoaded: true });
 	});
@@ -303,6 +320,7 @@ class Checkout extends Component {
 			<div className="row">
 				<div className="col-sm-12 col-lg-12">
 					<div className="payment-options">
+						<CardDemo /> 
 					</div>
 				</div>
 			</div>
