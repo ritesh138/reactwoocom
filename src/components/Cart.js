@@ -41,25 +41,36 @@ class Cart extends Component {
     }
     else{
       var updated_cart = [];
-      JSON.parse(cart).map((val,index) => {
-          if( variation_id && ( variation_id  == val.variation_id ) )
-          {
-            val.quantity = qty
-            val.line_subtotal = parseFloat(val.product_price)*qty
-            var line_item = val
-          }
-          else if( !variation_id && (product_id == val.product_id ) )
-          {
-            val.quantity = qty
-            val.line_subtotal = parseFloat(val.product_price)*qty
-            var line_item = val
-          }
-          else{
-            var line_item = val
-          }
-          updated_cart.push(line_item);
-      })
+      if( 0 == qty ) { 
+        removeCartItem(cart_item_key , product_id , variation_id ).then(result => {
+          localStorage.setItem('cart_content', JSON.stringify( result )  );
+          getLocalcart().then(res => {
+            this.setState({ cart: res} , function(){
+              this.componentDidMount();
+            });
+          })
+        });
+      } else{
+        JSON.parse(cart).map((val,index) => {
+            if( variation_id && ( variation_id  == val.variation_id ) )
+            {
+              val.quantity = qty
+              val.line_subtotal = parseFloat(val.product_price)*qty
+              var line_item = val
+            }
+            else if( !variation_id && (product_id == val.product_id ) )
+            {
+              val.quantity = qty
+              val.line_subtotal = parseFloat(val.product_price)*qty
+              var line_item = val
+            }
+            else{
+              var line_item = val
+            }
+            updated_cart.push(line_item);
+        })
       localStorage.setItem('cart_content', JSON.stringify( updated_cart ) );
+      }
       getLocalcart().then(result => {
         this.setState({ cart: result  } , function(){
           this.componentDidMount();
@@ -126,6 +137,7 @@ class Cart extends Component {
           this.setState({ cart: result, isLoaded: true });
         });
         getLocalTotals().then(result => {
+          console.log( result )
           this.setState({ totals: result, isLoaded: true });
         })
        }
@@ -208,9 +220,9 @@ class Cart extends Component {
             </div>
           </section>
 
-          <section id="do_action">
+          <section id="do_action" style={{display:  (  0 < Object.keys(this.state.cart).length ) ? 'block' : 'none' }}>
             <div className="container">
-              <div className="heading">
+              <div className="heading" style={{ display: 'none' }}>
                 <h3>What would you like to do next?</h3>
                 <p>
                   Choose if you have a discount code or reward points you want
@@ -219,7 +231,7 @@ class Cart extends Component {
               </div>
               <div className="row">
                 <div className="col-sm-6">
-                  <div className="chose_area">
+                  <div className="chose_area" style={{ display: 'none' }} >
                     <ul className="user_option">
                       <li>
                         <input type="checkbox" />
@@ -287,7 +299,7 @@ class Cart extends Component {
 					Total <span dangerouslySetInnerHTML={{ __html: this.state.currencySymbol + this.state.totals.total }} />
                       </li>
                     </ul>
-                    <a className="btn btn-default update" href="">
+                    <a className="btn btn-default update" href="" style={{ display: 'none' }}>
                       Update
                     </a>
                     <Link className="btn btn-default check_out" to={"/checkout/"}>

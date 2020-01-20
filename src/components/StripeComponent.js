@@ -1,33 +1,30 @@
-import React, {useState, useEffect,Component} from 'react';
-import './../App.scss';
-
+import React, {Component} from 'react';
 import {
   CardElement,
   injectStripe,
   StripeProvider,
   Elements,
-  CardNumberElement
 } from 'react-stripe-elements';
 
 // You can customize your Elements to give it the look and feel of your site.
-const createOptions = () => ({
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#424770',
-      fontFamily: 'Open Sans, sans-serif',
-      letterSpacing: '0.025em',
-      '::placeholder': {
-        color: '#aab7c4',
+const createOptions = () => {
+  return {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#424770',
+        fontFamily: 'Open Sans, sans-serif',
+        letterSpacing: '0.025em',
+        '::placeholder': {
+          color: '#aab7c4',
+        },
       },
-    },
-    invalid: {
-      color: '#c23d4b',
-    },
+      invalid: {
+        color: '#c23d4b',
+      },
+    }
   }
-});
-
-
+};
 
 class _CardForm extends Component {
   state = {
@@ -75,7 +72,7 @@ const CardForm = injectStripe(_CardForm);
 export default class CardDemo extends Component {
   render() {
     return (
-      <StripeProvider apiKey={'pk_test_DtysxWqaXNdBN4TgzHCPiJlS'}>
+      <StripeProvider apiKey="pk_test_DtysxWqaXNdBN4TgzHCPiJlS">
         <Elements>
           <CardForm handleResult={this.props.handleResult} />
         </Elements>

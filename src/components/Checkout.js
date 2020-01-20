@@ -5,7 +5,7 @@ import { WooCommerce } from "./../service/WoocommerceConnection.js";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
 import { getCartContent , getCartTotals , getCurrentCurrency , getAllCountries , getAllStates , createOrder, clearCart , getLocalcart , isCart , getLocalTotals} from "../service/WoocommerceFunctions";
-import CardDemo from "./StripeComponent.js";
+import PaymentForm from "./StripeComponent.js";
 
 class Checkout extends Component {
   constructor(props) {
@@ -320,7 +320,7 @@ class Checkout extends Component {
 			<div className="row">
 				<div className="col-sm-12 col-lg-12">
 					<div className="payment-options">
-						<CardDemo /> 
+						{/* <PaymentForm />  */}
 					</div>
 				</div>
 			</div>

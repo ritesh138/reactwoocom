@@ -266,8 +266,8 @@ export const getLocalTotals = () => {
     return new Promise((resolve, reject) => {
         JSON.parse(cart).map((val,index) => {
             total += val.line_subtotal;
-            all_totals.subtotal = total;
-            all_totals.total = total;
+            all_totals.subtotal = total.toFixed(2);
+            all_totals.total = total.toFixed(2);
         })
         resolve(all_totals);
     })
