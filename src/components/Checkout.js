@@ -5,7 +5,8 @@ import { WooCommerce } from "./../service/WoocommerceConnection.js";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
 import { getCartContent , getCartTotals , getCurrentCurrency , getAllCountries , getAllStates , createOrder, clearCart , getLocalcart , isCart , getLocalTotals} from "../service/WoocommerceFunctions";
-import PaymentForm from "./StripeComponent.js";
+import {Elements, StripeProvider} from 'react-stripe-elements';
+import Stripecard from './StripeCard';
 
 class Checkout extends Component {
   constructor(props) {
@@ -318,9 +319,18 @@ class Checkout extends Component {
 				</table>
 			</div>
 			<div className="row">
-				<div className="col-sm-12 col-lg-12">
-					<div className="payment-options">
-						{/* <PaymentForm />  */}
+			    <div className="col-sm-7 col-lg-7">
+				</div>
+				<div className="col-sm-5 col-lg-5">
+					<div className="available_gateways">
+					<StripeProvider apiKey="pk_test_DtysxWqaXNdBN4TgzHCPiJlS">
+						<div className="card_box">
+						
+						<Elements>
+							<Stripecard dataFromParent = {this.state} />
+						</Elements>
+						</div>
+					</StripeProvider>
 					</div>
 				</div>
 			</div>
