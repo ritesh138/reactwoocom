@@ -112,8 +112,8 @@ class Checkout extends Component {
 	})
 	
 	req['line_items'] = temp_items
-	req['payment_method'] = "bacs"
-	req['set_paid'] = true
+	// req['payment_method'] = "bacs"
+	req['set_paid'] = false
 	req['shipping_lines'] = [{
 		method_id: "free_shipping",
 		method_title: "Free Shipping",

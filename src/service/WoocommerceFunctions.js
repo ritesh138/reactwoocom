@@ -252,7 +252,7 @@ export const isCart = () => {
 }
 
 export const getAdminToken = () => {
-    var req = { username: 'admin', password: 'sunil1990' };
+    var req = { username: 'admin', password: 'test123G' };
     return new Promise((resolve, reject) => {
         postData("wp-json/jwt-auth/v1/token", req).then(result => {
             resolve(result)
