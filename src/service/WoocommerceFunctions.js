@@ -158,11 +158,15 @@ export const clearCart = () =>{
 
 export const createOrder = (data) => {
     return new Promise((resolve, reject) => {
-        getAdminToken().then(result => {
-            data['customer_id'] = sessionStorage.getItem('user_id');
-            postData('wp-json/wc/v3/orders', data , result.token).then((result) => {
-                resolve(result)
-            })
+        // getAdminToken().then(result => {
+        //     data['customer_id'] = sessionStorage.getItem('user_id');
+        //     postData('wp-json/wc/v3/orders', data , result.token).then((result) => {
+        //         resolve(result)
+        //     })
+        // })
+        WooCommerceV3.postAsync("orders",data).then(function(result) {
+            resolve(JSON.parse(result.toJSON().body));
+            // console.log(JSON.parse(result.toJSON().body));
         })
     })
 }
@@ -270,5 +274,19 @@ export const getLocalTotals = () => {
             all_totals.total = total.toFixed(2);
         })
         resolve(all_totals);
+    })
+}
+
+export const paymentSubmit = (order_id, token) => {
+    // grab order_id and token from processOrder
+    let paymentData = {
+        "order_id": order_id,
+        "stripe_token": token
+    }
+    // console.log(paymentData);
+    return new Promise((resolve, reject) => {
+        postData('wp-json/wc/v2/payment/stripe', paymentData).then(result => {
+            resolve(result)
+        });
     })
 }

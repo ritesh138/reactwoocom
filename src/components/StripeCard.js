@@ -32,10 +32,10 @@ class Stripecard extends Component {
   }
 
   async submit(ev) {
-    console.log(this.props);
+    // console.log(this.props);
       let {token} = await this.props.stripe.createToken({name: "Name"});
         this.setState({ stripetoken: token });
-      console.log(token);
+        this.props.handleToken( this.state.stripetoken );
   }
 
   render() {
@@ -43,7 +43,7 @@ class Stripecard extends Component {
       <div className="checkout">
         <p>Would you like to complete the purchase?</p>
         <CardElement {...createOptions()} />
-         <Button variant="secondary" onClick={this.submit} type="button" className="place_ordr_btn">Place Order</Button>
+         <Button variant="secondary" onClick={this.submit} type="submit" className="place_ordr_btn">Place Order</Button>
       </div>
     );
   }

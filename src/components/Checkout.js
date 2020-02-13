@@ -1,16 +1,16 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import "./../App.css";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import { WooCommerce } from "./../service/WoocommerceConnection.js";
 import Header from "./Header.js";
 import Footer from "./Footer.js";
-import { getCartContent , getCartTotals , getCurrentCurrency , getAllCountries , getAllStates , createOrder, clearCart , getLocalcart , isCart , getLocalTotals} from "../service/WoocommerceFunctions";
+import { getCartContent , getCartTotals , getCurrentCurrency , getAllCountries , getAllStates , createOrder, clearCart , getLocalcart , isCart , getLocalTotals , paymentSubmit} from "../service/WoocommerceFunctions";
 import {Elements, StripeProvider} from 'react-stripe-elements';
 import Stripecard from './StripeCard';
 
 class Checkout extends Component {
-  constructor(props) {
-    super(props);
+  constructor(state,props) {
+    super(state,props);
     this.state = {
       error: null,
 	  isLoaded: false,
@@ -41,9 +41,17 @@ class Checkout extends Component {
 	  shipping_city: '',
 	  shipping_state: '',
 	  shipping_postcode: '',
-	  order_comments: ''
-    };
+	  order_comments: '',
+	  dataFromParent: {},
+	  stripetoken:{}
+	};
+	this.handleToken = this.handleToken.bind(this);
   }
+
+  handleToken = (stripetoken) => {
+	// console.log(stripetoken);
+	this.setState({ stripetoken:stripetoken });
+  } 
 
   handleChange = e => {
 	if( ('billing_country' == e.target.name ) && ( 'select' != e.target.value ) )
@@ -68,7 +76,8 @@ class Checkout extends Component {
     this.setState(state);
   }
 
-  checkoutProcess() {
+  checkoutProcess = (e) => {
+	  e.preventDefault();
 	var req = { 'billing' : {
 		first_name : this.state.billing_first_name,
 		last_name : this.state.billing_last_name,
@@ -112,25 +121,46 @@ class Checkout extends Component {
 	})
 	
 	req['line_items'] = temp_items
-	// req['payment_method'] = "bacs"
-	req['set_paid'] = false
+	req['payment_method'] = "stripe"
+	req['set_paid'] = true
 	req['shipping_lines'] = [{
 		method_id: "free_shipping",
 		method_title: "Free Shipping",
 		total: "0"
 	  }]
-	createOrder(req).then(result => {
-		// sessionStorage.setItem("order_id", result.id);
-		clearCart();
 
-		this.props.history.push({
-			pathname: '/thankyou',
-			data: { 'order_id' : result.id } // your data array of objects
-		})
-    });
+	setTimeout(() => { 
+		// console.log(this.state.stripetoken.id);
+		createOrder(req).then(result => {
+	
+			if(result.id){
+				if (this.state.stripetoken.id) {
+					 
+					paymentSubmit(result.id, this.state.stripetoken.id).then(result => {
+					   console.log(result);
+					});
+				}
+			  
+				var token = localStorage.getItem('token');
+				if( token )
+				{
+					clearCart();
+				}else{
+					localStorage.removeItem("cart_content");
+				}
+			
+				  this.props.history.push({
+					pathname: '/thankyou',
+					data: { 'order_id' : result.id } // your data array of objects
+				})
+	
+			}
+		});
+    }, 2000);
   }
 
   componentDidMount() {
+	this.handleToken();
 	var token = localStorage.getItem('token');
 	if( token )
 	{
@@ -174,7 +204,7 @@ class Checkout extends Component {
 				  <li className="active">Check out</li>
 				</ol>
 			</div>
-			<form className="checkout">
+			<form className="checkout" onSubmit={this.checkoutProcess }>
 			<div className="shopper-info">
 				<div className="row">
 					<div className="col-sm-6 col-lg-6">
@@ -298,7 +328,7 @@ class Checkout extends Component {
 					</thead>
 					<tbody>
 					{Object.values(this.state.cart).map((item, i) => (
-						<tr>
+						<tr key={Math.random()}>
   							<td>{ item.product_name } x { item.quantity }</td>
 							<td dangerouslySetInnerHTML={{ __html: this.state.currencySymbol + item.line_subtotal.toFixed(2) }} />
 						</tr>
@@ -327,20 +357,20 @@ class Checkout extends Component {
 						<div className="card_box">
 						
 						<Elements>
-							<Stripecard dataFromParent = {this.state} />
+							<Stripecard handleToken={this.handleToken} dataFromParent = {this.state.dataFromParent} />
 						</Elements>
 						</div>
 					</StripeProvider>
 					</div>
 				</div>
 			</div>
-			<div className="row">
+			{/* <div className="row">
 				<div className="col-sm-12 col-lg-12">
 					<div className="place_order_btn">
 						<button type="button" className="btn btn-fefault" onClick={ () => this.checkoutProcess() }>Place Order</button>
 					</div>
 				</div>
-			</div>
+			</div> */}
 		</form>
 		</div>
 	</section> 
