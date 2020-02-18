@@ -3,8 +3,7 @@ import { BaseUrl } from "./../Config.js";
 
 export function postData(url, request_data, token) {
   var headers = { 
-    "Content-Type": "application/json",
-    //"cache-control": "no-cache",
+    "Content-Type": "application/json"
    };
 
   if (token) {

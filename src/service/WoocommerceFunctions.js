@@ -281,7 +281,7 @@ export const paymentSubmit = (order_id, token) => {
     // grab order_id and token from processOrder
     let paymentData = {
         "order_id": order_id,
-        "stripe_token": token
+        "stripe_token":token
     }
     // console.log(paymentData);
     return new Promise((resolve, reject) => {

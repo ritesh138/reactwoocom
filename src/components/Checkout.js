@@ -92,8 +92,8 @@ class Checkout extends Component {
 		email : this.state.billing_email
 		}
 	}
-	if( this.state.different_shipping )
-	{
+	// if( this.state.different_shipping )
+	// {
 		req['shipping'] = {
 			first_name : this.state.shipping_first_name,
 			last_name : this.state.shipping_last_name,
@@ -105,7 +105,7 @@ class Checkout extends Component {
 			state : this.state.shipping_state,
 			postcode : this.state.shipping_postcode
 		}
-	}
+	// }
 	if( this.state.order_comments )
 	{
 		req['customer_note'] = this.state.order_comments
@@ -122,20 +122,19 @@ class Checkout extends Component {
 	
 	req['line_items'] = temp_items
 	req['payment_method'] = "stripe"
-	req['set_paid'] = true
+	req['set_paid'] = false
 	req['shipping_lines'] = [{
 		method_id: "free_shipping",
 		method_title: "Free Shipping",
 		total: "0"
 	  }]
 
-	setTimeout(() => { 
+	// setTimeout(() => { 
 		// console.log(this.state.stripetoken.id);
 		createOrder(req).then(result => {
 	
 			if(result.id){
 				if (this.state.stripetoken.id) {
-					 
 					paymentSubmit(result.id, this.state.stripetoken.id).then(result => {
 					   console.log(result);
 					});
@@ -156,7 +155,7 @@ class Checkout extends Component {
 	
 			}
 		});
-    }, 2000);
+    // }, 700);
   }
 
   componentDidMount() {
